@@ -1,2 +1,2 @@
 include LICENSE
-recursive-include snee_style/styles *
+recursive-include snee_styles/styles *.mplstyle *.json

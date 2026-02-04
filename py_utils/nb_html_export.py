@@ -62,7 +62,7 @@ def convert_notebook_to_html_string(notebook_path:str,
     # Convert the notebook to HTML
     (body, resources) = html_exporter.from_filename(notebook_path)
     
-    plotly_script_tag = '<script src="https://cdn.plot.ly/plotly-232.0.min.js"></script>\n'
+    plotly_script_tag = '<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>\n'
     
     if '<head>' in body:
         body = body.replace("<head>", f"<head>\n {plotly_script_tag}")
@@ -76,7 +76,7 @@ def convert_notebook_to_html_string(notebook_path:str,
         return body
 
     # Combining TOC and Body
-    body_with_toc = f"<div id = 'toc'><h3>Table of content</h3>{toc}<hr></div> \n \n {body}"
+    body_with_toc = f"<div id = 'toc'><h3>Table of contents</h3>{toc}<hr></div> \n \n {body}"
     
     return body_with_toc
 
