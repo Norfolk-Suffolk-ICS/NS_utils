@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import toml
 import pandas as pd
 from sqlalchemy import create_engine, text
@@ -10,17 +11,31 @@ __all__ = [
     "load_data_try_parquet_first",
 ]
 
-DEFAULT_TOML_PATH = os.path.join(os.path.dirname(__file__), "..", "Setup", "connections.toml")
-
 
 class SnowflakeCredentialsError(Exception):
     """Raised when required Snowflake credentials are missing."""
     pass
 
 
+def _find_connections_toml():
+    """
+    Auto-discover Setup/connections.toml by searching upward from the current working directory.
+    """
+    current = Path.cwd()
+
+    for parent in [current, *current.parents]:
+        candidate = parent / "Setup" / "connections.toml"
+        if candidate.exists():
+            return str(candidate)
+
+    raise SnowflakeCredentialsError(
+        "connections.toml not found. Expected at project_root/Setup/connections.toml"
+    )
+
+
 def create_snowflake_sql_engine(
-    profile_env: str = None,  # default to None (should be 'prd' or 'dev')
-    toml_path: str = DEFAULT_TOML_PATH, **kwargs):
+    profile_env: str = None, # default to None (should be 'prd' or 'dev')
+    toml_path: str = None, **kwargs):
     """
     Create a Snowflake SQLAlchemy engine using connections.toml.
     profile_env: 'prd' or 'dev'
@@ -38,6 +53,9 @@ def create_snowflake_sql_engine(
         "dev": "icsdatahub-dev"
     }
     profile = profile_map[profile_env.lower()]
+
+    if toml_path is None:
+        toml_path = _find_connections_toml()
 
     if not os.path.isfile(toml_path):
         raise SnowflakeCredentialsError(f"connections.toml not found at: {toml_path}")
