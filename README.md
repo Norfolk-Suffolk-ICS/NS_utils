@@ -1,11 +1,10 @@
 # Suffolk and North East Essex Integrated Care System
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![Python Version](https://img.shields.io/pypi/pyversions/SNEE_utils.svg)](https://pypi.org/project/SNEE_utils/)
 [![Code Style: Black](https://img.shields.io/badge/code%20style-black-black.svg)](https://github.com/ambv/black)
-
+![Contributions](https://img.shields.io/badge/contributions-welcome-brightgreen)
 
 ## SNEE_utils
-SNEE_utils is a Python package designed for reuse by analysts within the Suffolk and North East Essex (SNEE) Intelligence Function. All repositories within this organisation are developed and maintained by analysts based in the [SNEE Intelligence function](https://www.sneeics.org.uk/can-do-health-and-care/creative/knowledge-and-intelligence/) hub. The package includes two sub-packages:
+SNEE_utils is a Python package designed for reuse by analysts within the Suffolk and North East Essex (SNEE) Intelligence Function. All repositories within this organisation are developed and maintained by analysts based in the [SNEE Intelligence function](https://intelligencefunction.org/) hub. The package includes two sub-packages:
 <br>
 
 
