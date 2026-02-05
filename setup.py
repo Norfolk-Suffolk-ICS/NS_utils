@@ -13,5 +13,5 @@ setup(
     package_data={
         "snee_styles": ["styles/SNEE.mplstyle", "styles/SNEE_plotly.json"],
         # py_utils usually does not need package_data unless you have non-code files
-    },
+    }, 
 )
