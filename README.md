@@ -4,25 +4,25 @@
 ![Contributions](https://img.shields.io/badge/contributions-welcome-brightgreen)
 
 ## SNEE_utils
-SNEE_utils is a Python package designed for reuse by analysts within the Suffolk and North East Essex (SNEE) Intelligence Function. All repositories within this organisation are developed and maintained by analysts based in the [SNEE Intelligence function](https://intelligencefunction.org/) hub. The package includes two sub-packages:
+SNEE_utils is an Internal Python Library (Python package distribution) designed for reuse by analysts within the Suffolk and North East Essex (SNEE) Intelligence Function. All repositories within this organisation are developed and maintained by analysts based in the [SNEE Intelligence function](https://intelligencefunction.org/) hub. The package includes two sub-packages:
 <br>
 
 
-## Packages 
+## Packages/Modules of SNEE_utils Library 
 
-### 1. Python Utility Functions : py_utils
+### 1. Python Utility Package : py_utils
 
-#### Submodules & Tools
+#### Sub-modules & Tools
 - <b>nb_html_export.py</b> - This python file contains a set of convenience function to convert notebook to html and add table of contents. This primarily used nbconvert to perform the conversion and bs4 to insert the table of contents.
 - <b>snowflake_sql.py</b> - This python file contains a set of functions to establish connection with snowflake database and load/save data from sql files.
 - <b>utils.py</b> - This python file contains reusable analytical functions.
 
-### 2. SNEE Stylings : snee_styles
-- A Python package containing useful functions for implementing Suffolk and North East Essex (SNEE) Intelligence Function style.
+### 2. SNEE Styling/Visualisation Package : snee_styles
+- A Python package for visualisation, containing useful functions for implementing Suffolk and North East Essex (SNEE) Intelligence Function style.
 
 
 ## Installation: How do I install SNEE_utils?
-`SNEE_utils` is a parent package that holds both the child packages namely: `py_utils` and `SNEE_styles` Python packages. Installation is using pip:
+`SNEE_utils` is a parent package or python library that holds both the child packages namely: `py_utils` and `SNEE_styles` Python packages. Installation is using pip:
 - It is recommended to use a Virtual Environment
 - This will then install the module in your environment, optionally specifying the version
 
@@ -41,12 +41,17 @@ Once the parent package is installed, to use the py_utils or SNEE_styles package
 
 #### Example: py_utils
 ```python
-from py_utils import nb_html_export, snowflake_sql 
+from py_utils import snowflake_sql, nb_html_export, utils
+ # OR directly import each functions inside each sub-module in apckage py_utils, in this case you dont have to use module name before the function on each call
+from py_utils import convert_notebook_to_html_string, write_notebook_to_html, create_snowflake_sql_engine, load_data_try_parquet_first,
+    calculate_standardised_rates, calculate_axis_lim, get_fiscal_year
 
 my_notebook = "Report.ipynb"
 
 # By default this will include table of contents and exclude inputs (code)
 formatted_html_with_table_of_contents = nb_html_export.convert_notebook_to_html_string(my_notebook)
+# If import using 2nd way then 
+formatted_html_with_table_of_contents = convert_notebook_to_html_string(my_notebook)
 
 # This saves the notebook down to the original file name, but with .html
 nb_html_export.write_notebook_to_html(formatted_html_with_table_of_contents, my_notebook)
@@ -66,8 +71,8 @@ df.head()
 #### Example: SNEE_styles
 ```python
 # For Matplotlib and Seaborn Plots
-from snee_styles import mpl_styles
-mpl_styles()
+from snee_styles import mpl_style
+mpl_style()
 
 # For Plotly Plots
 from snee_styles import plotly_style
