@@ -62,10 +62,18 @@ def convert_notebook_to_html_string(notebook_path:str,
     # Convert the notebook to HTML
     (body, resources) = html_exporter.from_filename(notebook_path)
     
+    # Scripts for Plotly plots
     plotly_script_tag = '<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>\n'
+
+    # Scripts for UPSET ALTAIR plots
+    vega_script_tag = """
+                    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>   
+                    """
     
     if '<head>' in body:
-        body = body.replace("<head>", f"<head>\n {plotly_script_tag}")
+        body = body.replace("<head>", f"<head>\n {plotly_script_tag} {vega_script_tag} \n")
     else:
         body = plotly_script_tag + body
 
