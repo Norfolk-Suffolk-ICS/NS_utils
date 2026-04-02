@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="NS_utils",
-    version="0.1.0",
+    version="0.1.5",
     packages=find_packages(),  # This will find both py_utils and style_utils
     description="Common Python utility functions and NS stylings to reuse across projects.",
     author="Ibrahim Khan",
