@@ -13,10 +13,10 @@
 # permission is obtained from QuantumBlack Visual Analytics Ltd.
 
 """
-This module contains SNEE styles for common plotting libraries such as matplotlib.
+This module contains NS styles for common plotting libraries such as matplotlib.
 """
 
-from .mpl_style import mpl_style
+from .mpl_style import NS_style
 from .mpl_style import plotly_style
 
 __version__ = "0.1.5"

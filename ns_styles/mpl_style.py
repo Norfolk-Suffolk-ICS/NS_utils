@@ -13,7 +13,7 @@
 # permission is obtained from QuantumBlack Visual Analytics Ltd.
 
 """
-This module contains the ``mpl_style`` and ``plotly_style`` function which applies the snee_styles ``matplotlib`` theme
+This module contains the ``mpl_style`` and ``plotly_style`` function which applies the NS_styles ``matplotlib`` theme
 
 Some of the tick properties cannot be set using ``plt.style.use``,
 so we have to set them in code.
@@ -31,8 +31,8 @@ from os.path import join, dirname, realpath
 
 
 STYLE_DIR = realpath(join(dirname(__file__), "styles"))
-STYLE_DIR_PLOTLY = join(realpath(dirname(__file__)), "styles", "SNEE_plotly.json")
-COMMON_STYLE = "SNEE.mplstyle"
+STYLE_DIR_PLOTLY = join(realpath(dirname(__file__)), "styles", "NS_plotly.json")
+COMMON_STYLE = "NS.mplstyle"
 
 
 __all__ = ["mpl_style", "plotly_style"]
