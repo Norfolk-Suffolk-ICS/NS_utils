@@ -67,6 +67,4 @@ setup(
     package_data={
         "ns_styles": ["styles/NS.mplstyle", "styles/NS_plotly.json"],
     },
-    license="Apache-2.0",
-    license_files=["LICENSE"],
 )
