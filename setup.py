@@ -16,7 +16,7 @@ setup(
         "openpyxl>=3.1.5",
         "toml>=0.10.2",
         "tomlkit>=0.14.0",
-        "snowflake>=1.11.0".
+        "snowflake>=1.11.0",
         "snowflake-connector-python>=2.0",
         "snowflake-sqlalchemy>=1.8.2",
         "snowflake._legacy>=1.0.2",
