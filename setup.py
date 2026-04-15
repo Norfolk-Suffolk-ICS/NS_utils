@@ -25,17 +25,14 @@ setup(
         "splunk-sdk>=2.0.1",
         "SQLAlchemy>=2.0.46",
         "sqlglot>=23.0.5",
-
         # Data manipulation
         "numpy>=2.0.1",
-
         # Visualization and plots
         "matplotlib>=3.9.2",
         "contourpy>=1.2.1",    # Often used with matplotlib for contour plots
         "cycler>=0.12.1",      # Used in matplotlib to manage property cycles (like color or line style sequences) for plots
         "seaborn>=0.13.2",
         "plotly>=5.0",
-
         # Notebook manipulations
         "nbconvert>=7.16.4",
         "nbformat>=5.10.4",
@@ -43,7 +40,6 @@ setup(
         "MarkupSafe>=2.1.5",
         "mistune>=3.0.2",
         "pandocfilters>=1.5.1",
-
         # Other utilities
         "packaging>=24.1",
         "importlib_metadata>=8.2.0",
