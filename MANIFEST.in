@@ -1,2 +1,1 @@
-include LICENSE
 recursive-include ns_styles/styles *.mplstyle *.json
