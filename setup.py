@@ -5,7 +5,6 @@ setup(
     version="0.1.5",
     author="Ibrahim Khan",
     description="Common Python utility functions and NS ICS styling",
-    author="Ibrahim Khan",
     url="https://github.com/Norfolk-Suffolk-ICS/NS_utils",
     packages=find_packages(),
     install_requires=[
