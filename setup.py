@@ -63,7 +63,6 @@ setup(
         "webencodings>=0.5.1",
         "importlib_resources>=6.4.0",
     ],
-    include_package_data=True,
     package_data={
         "ns_styles": ["styles/NS.mplstyle", "styles/NS_plotly.json"],
     },
