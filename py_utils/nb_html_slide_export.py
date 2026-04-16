@@ -249,7 +249,7 @@ def convert_notebook_to_slides_html(
     
     return '\n'.join(html_parts)
 
-def write_notebook_to_html(notebook_content: str, notebook_path: str) -> None:
+def write_notebook_to_html_slide(notebook_content: str, notebook_path: str) -> None:
     """Writes notebook HTML content to a file.
     
     Args:
