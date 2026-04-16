@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="NS_utils",
-    version="0.1.5",
+    version="0.1.6",
     author="Ibrahim Khan",
     description="Common Python utility functions and NS ICS styling",
     url="https://github.com/Norfolk-Suffolk-ICS/NS_utils",

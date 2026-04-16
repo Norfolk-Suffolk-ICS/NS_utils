@@ -37,7 +37,7 @@ pip install git+https://github.com/Norfolk-Suffolk-ICS/NS_utils.git
 or optionally specifying a version:
 
 ```
-pip install git+https://github.com/Norfolk-Suffolk-ICS/NS_utils.git@v0.0.6
+pip install git+https://github.com/Norfolk-Suffolk-ICS/NS_utils.git@v0.1.6
 ```
 
 
