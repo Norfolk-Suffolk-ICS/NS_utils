@@ -91,6 +91,29 @@ def _get_slide_styles():
         .slide table th { background: #064169; color: white; padding: 12px; text-align: left; font-weight: 600; }
         .slide table td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; }
         .slide table tr:nth-child(even) { background: #f8f9fa; }
+        
+        /* Center align all output areas and plots */
+        .output_area { 
+            margin: 20px auto; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .output_subarea {
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+        }
+        .plotly-graph-div { 
+            margin: 20px auto !important;
+            display: block;
+        }
+        .vega-embed {
+            margin: 20px auto !important;
+            display: block;
+        }
+        
         .toc-list { list-style: none; margin-left: 0; font-size: 1.4em; }
         .toc-list li { padding: 15px 20px; margin: 10px 0; background: #f0f0f0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
         .toc-list li:hover { background: #e0e0e0; transform: translateX(10px); }
@@ -183,12 +206,17 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
                     if current_slide_cells:
                         slides.append((current_slide_cells, current_slide_title))
                     current_slide_cells = []
+                else:
+                    # First ## found - save everything before it as title slide
+                    if current_slide_cells:
+                        slides.append((current_slide_cells, None))  # None = title slide
+                    current_slide_cells = []
                 
                 found_first_h2 = True
                 current_slide_title = lines[0].strip('#').strip()
                 current_slide_cells.append(cell)
             else:
-                # Add to current slide (or title slide if before first ##)
+                # Add to current slide
                 current_slide_cells.append(cell)
         else:
             # Code or output cell - add to current slide
@@ -196,7 +224,11 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
     
     # Add the last slide
     if current_slide_cells:
-        slides.append((current_slide_cells, current_slide_title))
+        if found_first_h2:
+            slides.append((current_slide_cells, current_slide_title))
+        else:
+            # No ## found at all, everything is title slide
+            slides.append((current_slide_cells, None))
     
     return slides
 
@@ -248,9 +280,9 @@ def convert_notebook_to_slides_html(
         '<div class="slide-container">'
     ]
     
-    # Title slide with content before first ##
+    # Title slide - everything before first ##
     if slides and slides[0][1] is None:
-        # First slide has no title (content before first ##)
+        # First slide has no title (content before first ##), includes # and outputs after it
         first_slide_cells, _ = slides.pop(0)
         (body, _) = html_exporter.from_notebook_node(nbformat.v4.new_notebook(cells=first_slide_cells))
         html_parts.extend([
@@ -259,7 +291,7 @@ def convert_notebook_to_slides_html(
             '    </div>'
         ])
     else:
-        # No content before first ##, just show title
+        # No content before first ##, just show extracted title
         html_parts.extend([
             '    <div class="slide title-slide active">',
             f'        <h1>{title}</h1>',
@@ -278,7 +310,7 @@ def convert_notebook_to_slides_html(
                 '    </div>'
             ])
     
-    # Add content slides
+    # Add content slides (each ## section)
     for slide_cells, slide_title in slides:
         (body, _) = html_exporter.from_notebook_node(nbformat.v4.new_notebook(cells=slide_cells))
         html_parts.extend([
