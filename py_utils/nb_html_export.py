@@ -3,6 +3,76 @@ from nbconvert import HTMLExporter
 
 __all__ = ["convert_notebook_to_html_string","write_notebook_to_html"]
 
+def _get_custom_styles() -> str:
+    """Returns the custom CSS styles for the HTML output."""
+    styles = """
+    <style>
+    body{
+        font-family: Arial;
+        margin-left: 20%;
+        width: 70% !important;
+        display: flex;
+        margin-top: -70;
+    }
+
+    #toc {
+        position: fixed;
+        top: 25px;
+        bottom: 10px;
+        left: 5px;
+        width: 21%;
+        background-color: #C0CED8;
+        border: 2px ridge;
+        overflow-y: auto;
+        overflow-x: auto;
+        height: fit-content;
+        padding: 20px;
+        border-radius: 25px;
+        font-size: 14px;
+        line-height: 1.3;
+    }
+
+    #toc a{
+        color: #231F20;
+    }
+
+    #toc a:hover{
+        color: blue;
+    }
+
+    h1{
+        font-size: 40px !important;
+        color: #064169 !important;
+    }
+
+    h2 {
+        font-size: 30px !important;
+        color: #064169 !important;
+    }
+
+    h3 {
+        font-size: 24px !important;
+        color: #064169 !important;
+    }
+
+    p, li, ul {
+        font-size: 14px !important;
+        font-family: Arial;
+    }
+
+    table, tbody{
+        border: 1px outset;
+        text-align : center:
+        margin-left: inherit !important;
+    }
+
+    #buttons {
+        font-size: x-large !important;
+    }
+    </style>
+    """
+    return styles
+
 def _generate_table_of_contents(notebook_path:str)->str:
     """Finds all notebook headers in markdown cells and creates a table of contents 
     with links to each section.
@@ -72,10 +142,15 @@ def convert_notebook_to_html_string(notebook_path:str,
                     <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>   
                     """
     
+    # Get custom CSS styles
+    custom_styles = _get_custom_styles()
+    
     if '<head>' in body:
-        body = body.replace("<head>", f"<head>\n {plotly_script_tag} {vega_script_tag} \n")
+        # Insert scripts and styles into the head section
+        body = body.replace("<head>", f"<head>\n{plotly_script_tag}{vega_script_tag}\n{custom_styles}\n")
     else:
-        body = plotly_script_tag + body
+        # If no head tag, prepend everything
+        body = plotly_script_tag + custom_styles + body
 
     if make_table_of_contents:
         # Generating TOC
