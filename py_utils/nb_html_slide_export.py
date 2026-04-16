@@ -16,10 +16,8 @@ def _generate_slide_navigation():
 
 def _generate_table_of_contents(nb):
     """Finds all notebook headers in markdown cells and creates a table of contents.
-    
     Args:
         nb: nbformat notebook object (not a path!)
-
     Returns:
         Tuple of (TOC HTML string, list of slide titles)
     """
@@ -266,7 +264,7 @@ def convert_notebook_to_slides_html(
     
     return '\n'.join(html_parts)
 
-def write_notebook_to_html(notebook_content: str, notebook_path: str) -> None:
+def write_notebook_to_html_slide(notebook_content: str, notebook_path: str) -> None:
     """Writes notebook HTML content to a file.
     
     Args:
