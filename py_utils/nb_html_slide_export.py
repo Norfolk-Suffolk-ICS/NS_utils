@@ -3,46 +3,8 @@ from nbconvert import HTMLExporter
 
 __all__ = ["convert_notebook_to_slides_html", "write_notebook_to_html"]
 
-def _generate_table_of_contents(notebook_path: str):
-    """Finds all notebook headers in markdown cells and creates a table of contents."""
-    with open(notebook_path, 'r', encoding="utf-8") as f:
-        nb = nbformat.read(f, as_version=4)
-    
-    slide_titles = []
-    
-    for cell in nb['cells']:
-        if cell.cell_type == 'markdown':
-            lines = cell.source.split('\n')
-            for line in lines:
-                if line.startswith('##') and not line.startswith('###'):
-                    title = line.strip('#').strip()
-                    slide_titles.append(title)
-                    break
-    
-    toc_lines = ['<ul class="toc-list">']
-    for i, title in enumerate(slide_titles, 1):
-        toc_lines.append(f'  <li onclick="goToSlide({i})">{title}</li>')
-    toc_lines.append('</ul>')
-    
-    toc_html = '\n'.join(toc_lines)
-    return toc_html, slide_titles
 
-def _extract_title_from_notebook(notebook_path: str):
-    """Extract H1 title from notebook."""
-    with open(notebook_path, 'r', encoding="utf-8") as f:
-        nb = nbformat.read(f, as_version=4)
-    
-    for cell in nb['cells']:
-        if cell.cell_type == 'markdown':
-            lines = cell.source.split('\n')
-            for line in lines:
-                if line.startswith('# ') and not line.startswith('##'):
-                    return line.strip('#').strip()
-    
-    # Fallback to filename if no H1 found
-    import os
-    return os.path.basename(notebook_path).replace('.ipynb', '').replace('_', ' ').title()
-
+#############################################       STYLES      #######################################################
 def _get_slide_styles():
     """Returns the CSS styles for slide presentation - NO BACKGROUNDS."""
     return """
@@ -181,6 +143,25 @@ def _generate_slide_navigation():
     </div>
     """
 
+############################################################################################################################
+
+
+def _extract_title_from_notebook(notebook_path: str):
+    """Extract H1 title from notebook."""
+    with open(notebook_path, 'r', encoding="utf-8") as f:
+        nb = nbformat.read(f, as_version=4)
+    
+    for cell in nb['cells']:
+        if cell.cell_type == 'markdown':
+            lines = cell.source.split('\n')
+            for line in lines:
+                if line.startswith('# ') and not line.startswith('##'):
+                    return line.strip('#').strip()
+    # Fallback to filename if no H1 found
+    import os
+    return os.path.basename(notebook_path).replace('.ipynb', '').replace('_', ' ').title()
+
+
 def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = True):
     """Split notebook into slides based on ## markdown headers.
     
@@ -198,9 +179,18 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
     for cell in nb['cells']:
         if cell.cell_type == 'markdown':
             lines = cell.source.split('\n')
-            # Check if this cell starts with ##
-            if lines and lines[0].startswith('##') and not lines[0].startswith('###'):
-                # This is a new slide
+            
+            # Check EACH line for ##
+            has_h2 = False
+            h2_title = None
+            for line in lines:
+                if line.startswith('##') and not line.startswith('###'):
+                    has_h2 = True
+                    h2_title = line.strip('#').strip()
+                    break  # Only take first ## in this cell
+            
+            if has_h2:
+                # This cell contains a ## header - new slide starts
                 if found_first_h2:
                     # Save previous slide
                     if current_slide_cells:
@@ -213,10 +203,10 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
                     current_slide_cells = []
                 
                 found_first_h2 = True
-                current_slide_title = lines[0].strip('#').strip()
+                current_slide_title = h2_title
                 current_slide_cells.append(cell)
             else:
-                # Add to current slide
+                # No ## in this cell - add to current slide
                 current_slide_cells.append(cell)
         else:
             # Code or output cell - add to current slide
@@ -231,6 +221,32 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
             slides.append((current_slide_cells, None))
     
     return slides
+
+
+def _generate_table_of_contents(notebook_path: str):
+    """Finds all notebook headers in markdown cells and creates a table of contents."""
+    with open(notebook_path, 'r', encoding="utf-8") as f:
+        nb = nbformat.read(f, as_version=4)
+    
+    slide_titles = []
+    
+    for cell in nb['cells']:
+        if cell.cell_type == 'markdown':
+            lines = cell.source.split('\n')
+            for line in lines:
+                if line.startswith('##') and not line.startswith('###'):
+                    title = line.strip('#').strip()
+                    slide_titles.append(title)
+                    break
+    
+    toc_lines = ['<ul class="toc-list">']
+    for i, title in enumerate(slide_titles, 1):
+        toc_lines.append(f'  <li onclick="goToSlide({i})">{title}</li>')
+    toc_lines.append('</ul>')
+    
+    toc_html = '\n'.join(toc_lines)
+    return toc_html, slide_titles
+
 
 def convert_notebook_to_slides_html(
     notebook_path: str,
@@ -329,7 +345,7 @@ def convert_notebook_to_slides_html(
     
     return '\n'.join(html_parts)
 
-def write_notebook_to_html(notebook_content: str, notebook_path: str) -> None:
+def write_notebook_to_html_slide(notebook_content: str, notebook_path: str) -> None:
     """Writes notebook HTML content to a file."""
     if '.ipynb' in notebook_path:
         output_file_path = notebook_path.replace('.ipynb', '_slides.html')
