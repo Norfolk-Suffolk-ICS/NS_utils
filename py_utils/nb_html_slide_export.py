@@ -1,6 +1,5 @@
 import nbformat
 from nbconvert import HTMLExporter
-import re
 
 __all__ = ["convert_notebook_to_slides_html", "write_notebook_to_html"]
 
@@ -159,32 +158,45 @@ def _generate_slide_navigation():
     </div>
     """
 
-def _split_body_into_slides(body: str):
-    """Split HTML body into slides based on <h2> tags."""
-    # Find all h2 positions
-    h2_pattern = re.compile(r'<h2[^>]*>.*?</h2>', re.DOTALL)
-    matches = list(h2_pattern.finditer(body))
+def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = True):
+    """Split notebook into slides based on ## markdown headers.
     
-    if not matches:
-        # No h2 tags, return whole body as one slide
-        return [body]
+    Returns:
+        List of (slide_cells, slide_title) tuples
+    """
+    with open(notebook_path, 'r', encoding="utf-8") as f:
+        nb = nbformat.read(f, as_version=4)
     
     slides = []
+    current_slide_cells = []
+    current_slide_title = None
+    found_first_h2 = False
     
-    # First slide: everything before first h2
-    if matches[0].start() > 0:
-        slides.append(body[:matches[0].start()])
-    
-    # Each h2 starts a new slide
-    for i, match in enumerate(matches):
-        start = match.start()
-        # Find where this slide ends (at next h2 or end of body)
-        if i + 1 < len(matches):
-            end = matches[i + 1].start()
+    for cell in nb['cells']:
+        if cell.cell_type == 'markdown':
+            lines = cell.source.split('\n')
+            # Check if this cell starts with ##
+            if lines and lines[0].startswith('##') and not lines[0].startswith('###'):
+                # This is a new slide
+                if found_first_h2:
+                    # Save previous slide
+                    if current_slide_cells:
+                        slides.append((current_slide_cells, current_slide_title))
+                    current_slide_cells = []
+                
+                found_first_h2 = True
+                current_slide_title = lines[0].strip('#').strip()
+                current_slide_cells.append(cell)
+            else:
+                # Add to current slide (or title slide if before first ##)
+                current_slide_cells.append(cell)
         else:
-            end = len(body)
-        
-        slides.append(body[start:end])
+            # Code or output cell - add to current slide
+            current_slide_cells.append(cell)
+    
+    # Add the last slide
+    if current_slide_cells:
+        slides.append((current_slide_cells, current_slide_title))
     
     return slides
 
@@ -194,16 +206,6 @@ def convert_notebook_to_slides_html(
     make_table_of_contents: bool = True
 ) -> str:
     """Converts a Jupyter notebook to an HTML slideshow presentation."""
-    import os
-    
-    # Creating HTML exporter instance
-    html_exporter = HTMLExporter()
-
-    if exclude_input_cells:
-        html_exporter.exclude_input = True
-
-    # Convert the notebook to HTML
-    (body, resources) = html_exporter.from_filename(notebook_path)
     
     # Scripts for Plotly plots
     plotly_script_tag = '<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>\n'
@@ -221,8 +223,13 @@ def convert_notebook_to_slides_html(
     # Extract title from H1 in notebook
     title = _extract_title_from_notebook(notebook_path)
     
-    # Split body into slides
-    slide_contents = _split_body_into_slides(body)
+    # Split notebook into slides
+    slides = _split_notebook_into_slides(notebook_path, exclude_input_cells)
+    
+    # Create HTML exporter
+    html_exporter = HTMLExporter()
+    if exclude_input_cells:
+        html_exporter.exclude_input = True
     
     # Build complete HTML
     html_parts = [
@@ -238,13 +245,29 @@ def convert_notebook_to_slides_html(
         '</head>',
         '<body>',
         '<div class="keyboard-hint">Use ← → arrows or click buttons to navigate</div>',
-        '<div class="slide-container">',
-        '    <div class="slide title-slide active">',
-        f'        <h1>{title}</h1>',
-        '        <p style="font-size: 1.3em; margin-top: 20px;">Press → to begin</p>',
-        '    </div>'
+        '<div class="slide-container">'
     ]
     
+    # Title slide with content before first ##
+    if slides and slides[0][1] is None:
+        # First slide has no title (content before first ##)
+        first_slide_cells, _ = slides.pop(0)
+        (body, _) = html_exporter.from_notebook_node(nbformat.v4.new_notebook(cells=first_slide_cells))
+        html_parts.extend([
+            '    <div class="slide title-slide active">',
+            f'        {body}',
+            '    </div>'
+        ])
+    else:
+        # No content before first ##, just show title
+        html_parts.extend([
+            '    <div class="slide title-slide active">',
+            f'        <h1>{title}</h1>',
+            '        <p style="font-size: 1.3em; margin-top: 20px;">Press → to begin</p>',
+            '    </div>'
+        ])
+    
+    # Table of contents slide
     if make_table_of_contents:
         toc, slide_titles = _generate_table_of_contents(notebook_path)
         if slide_titles:
@@ -256,10 +279,11 @@ def convert_notebook_to_slides_html(
             ])
     
     # Add content slides
-    for content in slide_contents:
+    for slide_cells, slide_title in slides:
+        (body, _) = html_exporter.from_notebook_node(nbformat.v4.new_notebook(cells=slide_cells))
         html_parts.extend([
             '    <div class="slide content-slide">',
-            f'        {content}',
+            f'        {body}',
             '    </div>'
         ])
     
@@ -273,7 +297,7 @@ def convert_notebook_to_slides_html(
     
     return '\n'.join(html_parts)
 
-def write_notebook_to_html_slide(notebook_content: str, notebook_path: str) -> None:
+def write_notebook_to_html(notebook_content: str, notebook_path: str) -> None:
     """Writes notebook HTML content to a file."""
     if '.ipynb' in notebook_path:
         output_file_path = notebook_path.replace('.ipynb', '_slides.html')
