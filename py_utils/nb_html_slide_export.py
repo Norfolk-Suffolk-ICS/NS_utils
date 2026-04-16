@@ -1,40 +1,32 @@
 import nbformat
 from nbconvert import HTMLExporter
+import re
 
 __all__ = ["convert_notebook_to_slides_html", "write_notebook_to_html"]
 
-def _generate_slide_navigation():
-    """Generate navigation controls for slides."""
-    nav_html = """
-    <div class="slide-controls">
-        <button class="nav-btn" onclick="previousSlide()">&#10094; Previous</button>
-        <span class="slide-counter"><span id="current-slide">1</span> / <span id="total-slides">0</span></span>
-        <button class="nav-btn" onclick="nextSlide()">Next &#10095;</button>
-    </div>
-    """
-    return nav_html
-
-def _generate_table_of_contents(nb):
+def _generate_table_of_contents(notebook_path: str):
     """Finds all notebook headers in markdown cells and creates a table of contents.
+    
     Args:
-        nb: nbformat notebook object (not a path!)
+        notebook_path: string path to .ipynb notebook
+
     Returns:
         Tuple of (TOC HTML string, list of slide titles)
     """
+    with open(notebook_path, 'r', encoding="utf-8") as f:
+        nb = nbformat.read(f, as_version=4)
+    
     slide_titles = []
     
-    # Iterate through notebook cells to find headers
     for cell in nb['cells']:
         if cell.cell_type == 'markdown':
             lines = cell.source.split('\n')
             for line in lines:
                 if line.startswith('##') and not line.startswith('###'):
-                    # Only use level 2 headers (##) as slide titles
                     title = line.strip('#').strip()
                     slide_titles.append(title)
-                    break  # Only take first header per cell
+                    break
     
-    # Generate TOC as a bulleted list
     toc_lines = ['<ul class="toc-list">']
     for i, title in enumerate(slide_titles, 1):
         toc_lines.append(f'  <li onclick="goToSlide({i})">{title}</li>')
@@ -44,7 +36,7 @@ def _generate_table_of_contents(nb):
     return toc_html, slide_titles
 
 def _get_slide_styles():
-    """Generate CSS styles for slide-based presentation."""
+    """Returns the CSS styles for slide presentation."""
     return """
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -80,7 +72,7 @@ def _get_slide_styles():
     """
 
 def _get_slide_scripts():
-    """Generate JavaScript for slide navigation."""
+    """Returns JavaScript for slide navigation."""
     return """
     <script>
         let currentSlide = 0;
@@ -124,53 +116,37 @@ def _get_slide_scripts():
     </script>
     """
 
-def _split_into_slides(nb, exclude_input_cells=True):
-    """Split notebook content into individual slides based on headers.
-    
-    Args:
-        nb: nbformat notebook object
-        exclude_input_cells: Whether to exclude code input cells
-    
-    Returns:
-        List of HTML strings, one per slide
+def _generate_slide_navigation():
+    """Returns navigation controls HTML."""
+    return """
+    <div class="slide-controls">
+        <button class="nav-btn" onclick="previousSlide()">&#10094; Previous</button>
+        <span class="slide-counter"><span id="current-slide">1</span> / <span id="total-slides">0</span></span>
+        <button class="nav-btn" onclick="nextSlide()">Next &#10095;</button>
+    </div>
     """
-    html_exporter = HTMLExporter()
-    if exclude_input_cells:
-        html_exporter.exclude_input = True
+
+def _split_body_into_slides(body: str):
+    """Split HTML body into slides based on <h2> tags."""
+    # Split by h2 tags
+    parts = re.split(r'(<h2[^>]*>.*?</h2>)', body, flags=re.DOTALL)
     
     slides = []
-    current_slide_content = []
+    current_slide = ""
     
-    for cell in nb['cells']:
-        if cell.cell_type == 'markdown':
-            lines = cell.source.split('\n')
-            if lines and lines[0].startswith('##') and not lines[0].startswith('###'):
-                # Save previous slide if it has content
-                if current_slide_content:
-                    slides.append('\n'.join(current_slide_content))
-                    current_slide_content = []
-                
-                # Start new slide with this header
-                (body, _) = html_exporter.from_notebook_node(
-                    nbformat.v4.new_notebook(cells=[cell])
-                )
-                current_slide_content.append(body)
+    for part in parts:
+        if part.strip():
+            if part.startswith('<h2'):
+                # Start new slide
+                if current_slide:
+                    slides.append(current_slide)
+                current_slide = part
             else:
-                # Add to current slide
-                (body, _) = html_exporter.from_notebook_node(
-                    nbformat.v4.new_notebook(cells=[cell])
-                )
-                current_slide_content.append(body)
-        else:
-            # Code or output cell - add to current slide
-            (body, _) = html_exporter.from_notebook_node(
-                nbformat.v4.new_notebook(cells=[cell])
-            )
-            current_slide_content.append(body)
+                current_slide += part
     
-    # Add the last slide
-    if current_slide_content:
-        slides.append('\n'.join(current_slide_content))
+    # Add last slide
+    if current_slide:
+        slides.append(current_slide)
     
     return slides
 
@@ -193,30 +169,37 @@ def convert_notebook_to_slides_html(
     """
     import os
     
-    # Read the notebook using nbformat (consistent with your original code)
-    with open(notebook_path, 'r', encoding='utf-8') as f:
-        nb = nbformat.read(f, as_version=4)
+    # Creating HTML exporter instance
+    html_exporter = HTMLExporter()
+
+    if exclude_input_cells:
+        # Exclude code cells from the output
+        html_exporter.exclude_input = True
+
+    # Convert the notebook to HTML
+    (body, resources) = html_exporter.from_filename(notebook_path)
+    
+    # Scripts for Plotly plots
+    plotly_script_tag = '<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>\n'
+
+    # Scripts for UPSET ALTAIR plots
+    vega_script_tag = """
+                    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+                    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>   
+                    """
+    
+    # Get slide styles
+    slide_styles = _get_slide_styles()
     
     # Get title from filename if not provided
     if title is None:
         title = os.path.basename(notebook_path).replace('.ipynb', '').replace('_', ' ').title()
     
-    # Generate table of contents (passing notebook object, not path)
-    toc_html, slide_titles = _generate_table_of_contents(nb)
+    # Split body into slides
+    slide_contents = _split_body_into_slides(body)
     
-    # Split notebook into slides (passing notebook object, not path)
-    slide_contents = _split_into_slides(nb, exclude_input_cells)
-    
-    # Scripts for Plotly plots
-    plotly_script_tag = '<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>'
-    
-    # Scripts for UPSET ALTAIR plots
-    vega_script_tag = """
-    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>"""
-    
-    # Build the complete HTML
+    # Build complete HTML
     html_parts = [
         '<!DOCTYPE html>',
         '<html lang="en">',
@@ -226,7 +209,7 @@ def convert_notebook_to_slides_html(
         f'    <title>{title}</title>',
         f'    {plotly_script_tag}',
         f'    {vega_script_tag}',
-        _get_slide_styles(),
+        slide_styles,
         '</head>',
         '<body>',
         '<div class="keyboard-hint">Use ← → arrows or click buttons to navigate</div>',
@@ -237,16 +220,18 @@ def convert_notebook_to_slides_html(
         '    </div>'
     ]
     
-    # Table of contents slide
-    if make_table_of_contents and slide_titles:
-        html_parts.extend([
-            '    <div class="slide toc-slide">',
-            '        <h2>Table of Contents</h2>',
-            f'        {toc_html}',
-            '    </div>'
-        ])
+    if make_table_of_contents:
+        # Generating TOC
+        toc, slide_titles = _generate_table_of_contents(notebook_path)
+        if slide_titles:
+            html_parts.extend([
+                '    <div class="slide toc-slide">',
+                '        <h2>Table of Contents</h2>',
+                f'        {toc}',
+                '    </div>'
+            ])
     
-    # Content slides
+    # Add content slides
     for content in slide_contents:
         html_parts.extend([
             '    <div class="slide">',
@@ -264,7 +249,7 @@ def convert_notebook_to_slides_html(
     
     return '\n'.join(html_parts)
 
-def write_notebook_to_html_slide(notebook_content: str, notebook_path: str) -> None:
+def write_notebook_to_html(notebook_content: str, notebook_path: str) -> None:
     """Writes notebook HTML content to a file.
     
     Args:
@@ -279,4 +264,4 @@ def write_notebook_to_html_slide(notebook_content: str, notebook_path: str) -> N
     with open(output_file_path, 'w', encoding='utf-8') as f:
         f.write(notebook_content)
     
-    print(f"Slideshow saved to: {output_file_path}")
+    return
