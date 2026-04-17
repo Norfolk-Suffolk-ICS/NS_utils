@@ -1,81 +1,76 @@
 import nbformat
 from nbconvert import HTMLExporter
+import os
+import base64
 
-__all__ = ["convert_notebook_to_slides_html", "write_notebook_to_html"]
+__all__ = ["convert_notebook_to_slides_html", "write_notebook_to_html_slide"]
 
-
-#############################################       STYLES      #######################################################
+######################################      STYLES & JS SCRIPTS     ###################################################
 def _get_slide_styles():
-    """Returns the CSS styles for slide presentation - NO BACKGROUNDS."""
+    """Returns the CSS styles for slide presentation"""
     return """
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; color: #333; overflow: hidden; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; color: #333; overflow: hidden; }
+        
         .slide-container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
         .slide { 
             width: 100%; 
             height: 100%; 
             position: absolute; 
-            top: 0; 
-            left: 0; 
+            top: 5px; 
+            left: 5px;
+            right: 5px;
+            bottom: 5px; 
             padding: 60px 80px; 
             background: white; 
             display: none; 
             overflow-y: auto; 
-            box-shadow: 0 0 40px rgba(0,0,0,0.1); 
+            box-shadow: 0 0 40px rgba(0,0,0,0.3); 
         }
         .slide.active { display: block; }
         .slide.title-slide { 
-            background: white; 
-            color: #333; 
             display: flex; 
             flex-direction: column; 
             justify-content: center; 
-            align-items: center; 
-            text-align: center; 
+            align-items: center;  
         }
-        .slide.toc-slide { 
-            background: white; 
-            color: #333; 
+        
+        /* Logo - TOP RIGHT */
+        .slide-logo {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            max-width: 210px;
+            max-height: 140px;
+            z-index: 100;
         }
-        .slide.content-slide {
-            text-align: center;
-        }
-        .slide h1 { font-size: 3.5em; margin-bottom: 0.3em; font-weight: 700; color: #064169; }
-        .slide h2 { font-size: 2.5em; margin-bottom: 0.5em; color: #064169; border-bottom: 3px solid #064169; padding-bottom: 0.2em; }
-        .slide h3 { font-size: 1.8em; margin-top: 1em; margin-bottom: 0.5em; color: #064169; }
-        .slide p { font-size: 1.2em; line-height: 1.6; margin-bottom: 1em; }
-        .slide ul, .slide ol { font-size: 1.2em; margin-left: 2em; margin-bottom: 1em; line-height: 1.8; display: inline-block; text-align: left; }
-        .slide img { max-width: 90%; max-height: 500px; display: block; margin: 20px auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        
+        /* Typography */
+        .slide h1 { font-size: 5.5em !important; margin-bottom: 0.5em; font-weight: 800 !important; color: #064169; }
+        .slide h2 { font-size: 3.5em !important; margin-bottom: 0.5em; color: #064169; border-bottom: 3px solid #064169; padding-bottom: 0.2em; }
+        .slide h3 { font-size: 2.5em !important; margin-top: 1em; margin-bottom: 0.5em; color: #064169; }
+        .slide p { font-size: 1.5em !important; line-height: 1.5; margin-bottom: 0.5em; }
+        .slide ul, .slide ol { font-size: 1.5em !important; margin-left: 2em; margin-bottom: 0.5em; line-height: 1.5; display: inline-block; text-align: left; }
+        
+        a {color: #0000EE !important;}
+
+        /* Media - exclude logo from general img styling */
+        .slide img:not(.slide-logo) { max-height: 500px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
         .slide pre { background: #f8f9fa; border-left: 4px solid #064169; padding: 20px; margin: 20px auto; overflow-x: auto; border-radius: 6px; font-size: 0.95em; max-width: 90%; text-align: left; }
         .slide code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
+        
+        /* Tables */
         .slide table { width: 90%; border-collapse: collapse; margin: 20px auto; font-size: 1em; }
-        .slide table th { background: #064169; color: white; padding: 12px; text-align: left; font-weight: 600; }
+        .slide table th { background: #064169; color: white; padding: 12px; text-align: left; font-weight: 600 !important; }
         .slide table td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; }
         .slide table tr:nth-child(even) { background: #f8f9fa; }
         
-        /* Center align all output areas and plots */
-        .output_area { 
-            margin: 20px auto; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .output_subarea {
-            margin: 0 auto;
-            display: flex;
-            justify-content: center;
-        }
-        .plotly-graph-div { 
-            margin: 20px auto !important;
-            display: block;
-        }
-        .vega-embed {
-            margin: 20px auto !important;
-            display: block;
-        }
+        /* Output areas */
+        .output_area, .output_subarea { margin: 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .plotly-graph-div, .vega-embed { margin: 20px auto !important; display: block; }
         
+        /* Navigation */
         .toc-list { list-style: none; margin-left: 0; font-size: 1.4em; }
         .toc-list li { padding: 15px 20px; margin: 10px 0; background: #f0f0f0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
         .toc-list li:hover { background: #e0e0e0; transform: translateX(10px); }
@@ -84,7 +79,9 @@ def _get_slide_styles():
         .nav-btn:hover { background: #053050; transform: scale(1.05); }
         .nav-btn:disabled { background: #ccc; cursor: not-allowed; transform: scale(1); }
         .slide-counter { color: white; font-size: 1.1em; font-weight: 600; }
-        .keyboard-hint { position: fixed; top: 20px; right: 30px; background: rgba(0,0,0,0.7); color: white; padding: 10px 15px; border-radius: 8px; font-size: 0.9em; opacity: 0.6; z-index: 999; }
+        
+        /* Keyboard hint - MOVED TO BOTTOM LEFT */
+        .keyboard-hint {position: fixed; bottom: 30px; left: 30px; color: white; padding: 10px 15px; border-radius: 8px; font-size: 0.9em; opacity: 0.6; z-index: 999;}
     </style>
     """
 
@@ -142,7 +139,6 @@ def _generate_slide_navigation():
         <button class="nav-btn" onclick="nextSlide()">Next &#10095;</button>
     </div>
     """
-
 ############################################################################################################################
 
 
@@ -157,17 +153,12 @@ def _extract_title_from_notebook(notebook_path: str):
             for line in lines:
                 if line.startswith('# ') and not line.startswith('##'):
                     return line.strip('#').strip()
-    # Fallback to filename if no H1 found
-    import os
+    
     return os.path.basename(notebook_path).replace('.ipynb', '').replace('_', ' ').title()
 
 
 def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = True):
-    """Split notebook into slides based on ## markdown headers.
-    
-    Returns:
-        List of (slide_cells, slide_title) tuples
-    """
+    """Split notebook into slides based on ## markdown headers."""
     with open(notebook_path, 'r', encoding="utf-8") as f:
         nb = nbformat.read(f, as_version=4)
     
@@ -180,44 +171,47 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
         if cell.cell_type == 'markdown':
             lines = cell.source.split('\n')
             
-            # Check EACH line for ##
-            has_h2 = False
-            h2_title = None
-            for line in lines:
+            # Find ALL ## headers in this cell
+            h2_positions = []
+            for i, line in enumerate(lines):
                 if line.startswith('##') and not line.startswith('###'):
-                    has_h2 = True
-                    h2_title = line.strip('#').strip()
-                    break  # Only take first ## in this cell
+                    h2_positions.append(i)
             
-            if has_h2:
-                # This cell contains a ## header - new slide starts
-                if found_first_h2:
-                    # Save previous slide
-                    if current_slide_cells:
-                        slides.append((current_slide_cells, current_slide_title))
-                    current_slide_cells = []
-                else:
-                    # First ## found - save everything before it as title slide
-                    if current_slide_cells:
-                        slides.append((current_slide_cells, None))  # None = title slide
-                    current_slide_cells = []
-                
-                found_first_h2 = True
-                current_slide_title = h2_title
-                current_slide_cells.append(cell)
+            if h2_positions:
+                # This cell has one or more ## headers
+                for idx, h2_pos in enumerate(h2_positions):
+                    if idx + 1 < len(h2_positions):
+                        end_pos = h2_positions[idx + 1]
+                    else:
+                        end_pos = len(lines)
+                    
+                    section_lines = lines[h2_pos:end_pos]
+                    section_content = '\n'.join(section_lines)
+                    h2_title = section_lines[0].strip('#').strip()
+                    
+                    section_cell = nbformat.v4.new_markdown_cell(section_content)
+                    
+                    if found_first_h2:
+                        if current_slide_cells:
+                            slides.append((current_slide_cells, current_slide_title))
+                        current_slide_cells = []
+                    else:
+                        if current_slide_cells:
+                            slides.append((current_slide_cells, None))
+                        current_slide_cells = []
+                    
+                    found_first_h2 = True
+                    current_slide_title = h2_title
+                    current_slide_cells.append(section_cell)
             else:
-                # No ## in this cell - add to current slide
                 current_slide_cells.append(cell)
         else:
-            # Code or output cell - add to current slide
             current_slide_cells.append(cell)
     
-    # Add the last slide
     if current_slide_cells:
         if found_first_h2:
             slides.append((current_slide_cells, current_slide_title))
         else:
-            # No ## found at all, everything is title slide
             slides.append((current_slide_cells, None))
     
     return slides
@@ -237,7 +231,6 @@ def _generate_table_of_contents(notebook_path: str):
                 if line.startswith('##') and not line.startswith('###'):
                     title = line.strip('#').strip()
                     slide_titles.append(title)
-                    break
     
     toc_lines = ['<ul class="toc-list">']
     for i, title in enumerate(slide_titles, 1):
@@ -248,38 +241,41 @@ def _generate_table_of_contents(notebook_path: str):
     return toc_html, slide_titles
 
 
-def convert_notebook_to_slides_html(
-    notebook_path: str,
-    exclude_input_cells: bool = True,
-    make_table_of_contents: bool = True
-) -> str:
+def convert_notebook_to_slides_html(notebook_path: str, exclude_input_cells: bool = True, make_table_of_contents: bool = True) -> str:
     """Converts a Jupyter notebook to an HTML slideshow presentation."""
-    
-    # Scripts for Plotly plots
-    plotly_script_tag = '<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>\n'
 
-    # Scripts for UPSET ALTAIR plots
+    # Try to find and encode logo
+    logo_base64 = ""
+    notebook_dir = os.path.dirname(os.path.abspath(notebook_path))
+    
+    # Try same directory
+    logo_path = os.path.join(notebook_dir, 'NS_IF_Logo.png')
+    if not os.path.exists(logo_path):
+        # Try parent directory
+        logo_path = os.path.join(os.path.dirname(notebook_dir), 'NS_IF_Logo.png')
+    
+    if os.path.exists(logo_path):
+        with open(logo_path, 'rb') as f:
+            logo_base64 = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
+
+    # Logo HTML - create once
+    logo_html = f'<a href="https://www.intelligencefunction.org" target="_blank"><img src="{logo_base64}" class="slide-logo" alt="Logo"></a>' if logo_base64 else ''
+
+    plotly_script_tag = '<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>\n'
     vega_script_tag = """
                     <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
                     <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
                     <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>   
                     """
     
-    # Get slide styles
     slide_styles = _get_slide_styles()
-    
-    # Extract title from H1 in notebook
     title = _extract_title_from_notebook(notebook_path)
-    
-    # Split notebook into slides
     slides = _split_notebook_into_slides(notebook_path, exclude_input_cells)
     
-    # Create HTML exporter
     html_exporter = HTMLExporter()
     if exclude_input_cells:
         html_exporter.exclude_input = True
-    
-    # Build complete HTML
+
     html_parts = [
         '<!DOCTYPE html>',
         '<html lang="en">',
@@ -296,22 +292,23 @@ def convert_notebook_to_slides_html(
         '<div class="slide-container">'
     ]
     
-    # Title slide - everything before first ##
+    # Title slide
     if slides and slides[0][1] is None:
-        # First slide has no title (content before first ##), includes # and outputs after it
         first_slide_cells, _ = slides.pop(0)
         (body, _) = html_exporter.from_notebook_node(nbformat.v4.new_notebook(cells=first_slide_cells))
         html_parts.extend([
             '    <div class="slide title-slide active">',
+            logo_html,
             f'        {body}',
+            '        <p style="font-size: 1.2em; margin-top: 30px;">Website: <a href="https://www.intelligencefunction.org" target="_blank">The Intelligence Function</a></p>',
             '    </div>'
         ])
     else:
-        # No content before first ##, just show extracted title
         html_parts.extend([
             '    <div class="slide title-slide active">',
+            logo_html,
             f'        <h1>{title}</h1>',
-            '        <p style="font-size: 1.3em; margin-top: 20px;">Press → to begin</p>',
+            '        <p style="font-size: 1.2em; margin-top: 30px;">Website: <a href="https://www.intelligencefunction.org" target="_blank">The Intelligence Function</a></p>',
             '    </div>'
         ])
     
@@ -321,12 +318,13 @@ def convert_notebook_to_slides_html(
         if slide_titles:
             html_parts.extend([
                 '    <div class="slide toc-slide">',
+                logo_html,
                 '        <h2>Table of Contents</h2>',
                 f'        {toc}',
                 '    </div>'
             ])
     
-    # Add content slides (each ## section)
+    # Add content slides
     for slide_cells, slide_title in slides:
         (body, _) = html_exporter.from_notebook_node(nbformat.v4.new_notebook(cells=slide_cells))
         html_parts.extend([
@@ -342,8 +340,9 @@ def convert_notebook_to_slides_html(
         '</body>',
         '</html>'
     ])
-    
+
     return '\n'.join(html_parts)
+
 
 def write_notebook_to_html_slide(notebook_content: str, notebook_path: str) -> None:
     """Writes notebook HTML content to a file."""

@@ -3,6 +3,7 @@ from nbconvert import HTMLExporter
 
 __all__ = ["convert_notebook_to_html_string","write_notebook_to_html"]
 
+######################################      STYLES & JS SCRIPTS     ###################################################
 def _get_custom_styles() -> str:
     """Returns the custom CSS styles for the HTML output."""
     styles = """
@@ -12,7 +13,6 @@ def _get_custom_styles() -> str:
         margin-left: 20%;
         width: 70% !important;
         display: flex;
-        margin-top: -70;
     }
 
     #toc {
@@ -38,6 +38,32 @@ def _get_custom_styles() -> str:
 
     #toc a:hover{
         color: blue;
+    }
+
+    #go-to-top {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        background-color: #064169;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        z-index: 1000;
+        display: none;
+        transition: background-color 0.3s;
+    }
+
+    #go-to-top:hover {
+        background-color: #0a5a8a;
+    }
+
+    #go-to-top.show {
+        display: block;
     }
 
     h1{
@@ -72,6 +98,31 @@ def _get_custom_styles() -> str:
     </style>
     """
     return styles
+
+def _get_scroll_script() -> str:
+    """Returns JavaScript for the Go to Top button functionality."""
+    script = """
+    <script>
+    var goToTopBtn = document.getElementById("go-to-top");
+
+    window.onscroll = function() {
+        if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+            goToTopBtn.classList.add("show");
+        } else {
+            goToTopBtn.classList.remove("show");
+        }
+    };
+
+    function scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    }
+    </script>
+    """
+    return script
+############################################################################################################################
 
 def _generate_table_of_contents(notebook_path:str)->str:
     """Finds all notebook headers in markdown cells and creates a table of contents 
@@ -115,13 +166,28 @@ def convert_notebook_to_html_string(notebook_path:str,
                                     make_table_of_contents:bool=True)->str:
     """Takes a notebook file path, and converts to html using nbconvert.HtmlExporter
     Args:
-        notebook path:str, path to the notebook file
+        notebook_path:str, path to the notebook file
         exclude_input_cells:bool, whether to include the input cells
         make_table_of_contents:bool, whether to make & include a table of contents
 
     Returns:
         A string containing the notebook html
     """
+    # Read notebook to add website link
+    with open(notebook_path, 'r', encoding='utf-8') as f:
+        nb = nbformat.read(f, as_version=4)
+    
+    # Add website link after first # header
+    for cell in nb['cells']:
+        if cell.cell_type == 'markdown':
+            lines = cell.source.split('\n')
+            for i, line in enumerate(lines):
+                if line.startswith('#') and not line.startswith('##'):
+                    lines.insert(i + 1, '\n*Website: [www.intelligencefunction.org](https://www.intelligencefunction.org)*\n')
+                    cell.source = '\n'.join(lines)
+                    break
+            break
+    
     # Creating HTML exporter instance
     html_exporter = HTMLExporter()
 
@@ -130,7 +196,7 @@ def convert_notebook_to_html_string(notebook_path:str,
         html_exporter.exclude_input = True
 
     # Convert the notebook to HTML
-    (body, resources) = html_exporter.from_filename(notebook_path)
+    (body, resources) = html_exporter.from_notebook_node(nb)
     
     # Scripts for Plotly plots
     plotly_script_tag = '<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>\n'
@@ -145,12 +211,25 @@ def convert_notebook_to_html_string(notebook_path:str,
     # Get custom CSS styles
     custom_styles = _get_custom_styles()
     
+    # Get scroll-to-top JavaScript
+    scroll_script = _get_scroll_script()
+    
     if '<head>' in body:
         # Insert scripts and styles into the head section
         body = body.replace("<head>", f"<head>\n{plotly_script_tag}{vega_script_tag}\n{custom_styles}\n")
     else:
         # If no head tag, prepend everything
         body = plotly_script_tag + custom_styles + body
+
+    # Add Go to Top button
+    go_to_top_button = '<button id="go-to-top" onclick="scrollToTop()">↑</button>\n'
+    
+    # Add button before closing body tag
+    if '</body>' in body:
+        body = body.replace('</body>', f'{go_to_top_button}{scroll_script}\n</body>')
+    else:
+        # If no body tag, append to the end
+        body = body + go_to_top_button + scroll_script
 
     if make_table_of_contents:
         # Generating TOC
