@@ -233,7 +233,7 @@ def _generate_table_of_contents(notebook_path: str):
                     slide_titles.append(title)
     
     toc_lines = ['<ul class="toc-list">']
-    for i, title in enumerate(slide_titles, 1):
+    for i, title in enumerate(slide_titles, 2):
         toc_lines.append(f'  <li onclick="goToSlide({i})">{title}</li>')
     toc_lines.append('</ul>')
     
