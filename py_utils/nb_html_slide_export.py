@@ -25,13 +25,11 @@ def _get_slide_styles():
             position: absolute; 
             top: 5px; 
             left: 5px;
-            right: 5px;
-            bottom: 5px; 
             padding: 60px 80px; 
             background: white; 
             display: none; 
             overflow-y: auto; 
-            box-shadow: 0 0 40px rgba(0,0,0,0.3); 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
         }
         .slide.active { display: block; }
         .slide.title-slide { 
@@ -84,7 +82,7 @@ def _get_slide_styles():
         .slide-counter { color: white; font-size: 1.1em; font-weight: 600; }
         
         /* Keyboard hint - MOVED TO BOTTOM LEFT */
-        .keyboard-hint {position: fixed; bottom: 30px; left: 30px; color: white; padding: 10px 15px; border-radius: 8px; font-size: 0.9em; opacity: 0.6; z-index: 999;}
+        .keyboard-hint {position: fixed; bottom: 30px; left: 30px; color: black; padding: 10px 15px; border-radius: 8px; font-size: 0.9em; opacity: 0.6; z-index: 999;}
     </style>
     """
 
