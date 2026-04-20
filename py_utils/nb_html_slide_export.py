@@ -259,26 +259,49 @@ def convert_notebook_to_slides_html(notebook_path: str, exclude_input_cells: boo
     # Get package directory (where this Python file is located)
     package_dir = os.path.dirname(os.path.abspath(__file__))
     assets_dir = os.path.join(package_dir, 'assets')
+    
+    # DEBUG - print to see what paths we're checking
+    print(f"Package dir: {package_dir}")
+    print(f"Assets dir: {assets_dir}")
+    print(f"Assets dir exists: {os.path.exists(assets_dir)}")
+    
     # Load logo
     logo_base64 = ""
     logo_path = os.path.join(assets_dir, 'NS_IF_Logo.png')
+    print(f"Logo path: {logo_path}")
+    print(f"Logo exists: {os.path.exists(logo_path)}")
     if os.path.exists(logo_path):
         with open(logo_path, 'rb') as f:
             logo_base64 = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
+            print("Logo loaded successfully")
+    else:
+        print("Logo NOT found")
+    
     # Load first slide image
     first_slide_img = ""
-    first_slide_path = os.path.join(assets_dir, 'main_slide.png')
+    first_slide_path = os.path.join(assets_dir, 'first_slide.png')
+    print(f"First slide path: {first_slide_path}")
+    print(f"First slide exists: {os.path.exists(first_slide_path)}")
     if os.path.exists(first_slide_path):
         with open(first_slide_path, 'rb') as f:
             first_slide_img = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
+            print("First slide loaded successfully")
+    else:
+        print("First slide NOT found")
+    
     # Load background image
     slide_bg_img = ""
-    bg_path = os.path.join(assets_dir, 'title_slide_bg.png')
+    bg_path = os.path.join(assets_dir, 'slide_bg.png')
+    print(f"Background path: {bg_path}")
+    print(f"Background exists: {os.path.exists(bg_path)}")
     if os.path.exists(bg_path):
         with open(bg_path, 'rb') as f:
             slide_bg_img = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
+            print("Background loaded successfully")
+    else:
+        print("Background NOT found")
 
-    # Logo HTML - create once
+    # Logo HTML
     logo_html = f'<a href="https://www.intelligencefunction.org" target="_blank"><img src="{logo_base64}" class="slide-logo" alt="Logo"></a>' if logo_base64 else ''
 
     plotly_script_tag = '<script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>\n'
