@@ -11,5 +11,6 @@ setup(
     include_package_data=True,
     package_data={
         "ns_styles": ["styles/NS.mplstyle", "styles/NS_plotly.json"],
+        'py_utils': ['assets/*'],
     },
 )
