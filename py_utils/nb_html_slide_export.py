@@ -7,11 +7,16 @@ __all__ = ["convert_notebook_to_slides_html", "write_notebook_to_html_slide"]
 
 ######################################      STYLES & JS SCRIPTS     ###################################################
 def _get_slide_styles():
-    """Returns the CSS styles for slide presentation"""
+    """Returns the custom CSS styles for the Slide presentation"""
     return """
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5; color: #333; overflow: hidden; }
+        body { 
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+            overflow: hidden;
+            }
         
         .slide-container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
         .slide { 
@@ -46,13 +51,11 @@ def _get_slide_styles():
             z-index: 100;
         }
         
-        /* Typography */
         .slide h1 { font-size: 5.5em !important; margin-bottom: 0.5em; font-weight: 800 !important; color: #064169; }
         .slide h2 { font-size: 3.5em !important; margin-bottom: 0.5em; color: #064169; border-bottom: 3px solid #064169; padding-bottom: 0.2em; }
         .slide h3 { font-size: 2.5em !important; margin-top: 1em; margin-bottom: 0.5em; color: #064169; }
         .slide p { font-size: 1.5em !important; line-height: 1.5; margin-bottom: 0.5em; }
         .slide ul, .slide ol { font-size: 1.5em !important; margin-left: 2em; margin-bottom: 0.5em; line-height: 1.5; display: inline-block; text-align: left; }
-        
         a {color: #0000EE !important;}
 
         /* Media - exclude logo from general img styling */

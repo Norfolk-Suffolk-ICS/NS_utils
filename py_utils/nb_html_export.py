@@ -5,7 +5,7 @@ __all__ = ["convert_notebook_to_html_string","write_notebook_to_html"]
 
 ######################################      STYLES & JS SCRIPTS     ###################################################
 def _get_custom_styles() -> str:
-    """Returns the custom CSS styles for the HTML output."""
+    """Returns the custom CSS styles for the HTML output"""
     styles = """
     <style>
     body{
@@ -14,7 +14,6 @@ def _get_custom_styles() -> str:
         width: 70% !important;
         display: flex;
     }
-
     #toc {
         position: fixed;
         top: 25px;
@@ -31,15 +30,12 @@ def _get_custom_styles() -> str:
         font-size: 14px;
         line-height: 1.3;
     }
-
     #toc a{
         color: #231F20;
     }
-
     #toc a:hover{
         color: blue;
     }
-
     #go-to-top {
         position: fixed;
         bottom: 30px;
@@ -57,41 +53,33 @@ def _get_custom_styles() -> str:
         display: none;
         transition: background-color 0.3s;
     }
-
     #go-to-top:hover {
         background-color: #0a5a8a;
     }
-
     #go-to-top.show {
         display: block;
     }
-
     h1{
         font-size: 40px !important;
         color: #064169 !important;
     }
-
     h2 {
         font-size: 30px !important;
         color: #064169 !important;
     }
-
     h3 {
         font-size: 24px !important;
         color: #064169 !important;
     }
-
     p, li, ul {
         font-size: 14px !important;
         font-family: Arial;
     }
-
     table, tbody{
         border: 1px outset;
         text-align : center:
         margin-left: inherit !important;
     }
-
     #buttons {
         font-size: x-large !important;
     }
@@ -125,15 +113,10 @@ def _get_scroll_script() -> str:
 ############################################################################################################################
 
 def _generate_table_of_contents(notebook_path:str)->str:
-    """Finds all notebook headers in markdown cells and creates a table of contents 
-    with links to each section.
-    Args:
-        notebook_path: string path to .ipynb notebook
-
-    Returns:
-        String containing the table of contents.
+    """Finds all notebook headers in markdown cells and creates a table of contents with links to each section.
+    Args: notebook_path: string path to .ipynb notebook
+    Returns: String containing the table of contents.
     """
-
     with open(notebook_path, 'r', encoding = "utf-8") as f:
          nb = nbformat.read(f, as_version=4)
          
@@ -149,29 +132,22 @@ def _generate_table_of_contents(notebook_path:str)->str:
                     level = line.count('#')
                     title = line.strip('#').strip()
                     table_of_contents.append((title, level))
-
     toc_lines = []
     for title, level in table_of_contents:
         indent = '&nbsp;'
         if level >2: 
             indent = level*indent*2
         toc_lines.append(f"{indent}<a href='#{title.replace(' ', '-')}'>{title}</a>")
-
     toc_str = "<br>".join(toc_lines)
     return toc_str
 
 
-def convert_notebook_to_html_string(notebook_path:str, 
-                                    exclude_input_cells=True,
-                                    make_table_of_contents:bool=True)->str:
+def convert_notebook_to_html_string(notebook_path:str, exclude_input_cells=True, make_table_of_contents:bool=True)->str:
     """Takes a notebook file path, and converts to html using nbconvert.HtmlExporter
-    Args:
-        notebook_path:str, path to the notebook file
-        exclude_input_cells:bool, whether to include the input cells
-        make_table_of_contents:bool, whether to make & include a table of contents
-
-    Returns:
-        A string containing the notebook html
+    Args: notebook_path:str, path to the notebook file
+          exclude_input_cells:bool, whether to include the input cells
+          make_table_of_contents:bool, whether to make & include a table of contents
+    Returns: A string containing the notebook html
     """
     # Read notebook to add website link
     with open(notebook_path, 'r', encoding='utf-8') as f:
@@ -187,8 +163,7 @@ def convert_notebook_to_html_string(notebook_path:str,
                     cell.source = '\n'.join(lines)
                     break
             break
-    
-    # Creating HTML exporter instance
+
     html_exporter = HTMLExporter()
 
     if exclude_input_cells:
@@ -244,11 +219,9 @@ def convert_notebook_to_html_string(notebook_path:str,
 
 
 def write_notebook_to_html(notebook_content:str, notebook_path:str)->None:
-    """
-    Takes a notebook file as a string and writes this to a html file.
-    Args:
-        notebook_content:str, the html content of the notebook
-        notebook_path:str, the path to save the notebook to, if this is .ipynb it will be changed to .html
+    """Takes a notebook file as a string and writes this to a html file.
+    Args: notebook_content:str, the html content of the notebook
+          notebook_path:str, the path to save the notebook to, if this is .ipynb it will be changed to .html
     """
     if '.ipynb' in notebook_path:
         output_file_path = notebook_path.replace('.ipynb','.html')
