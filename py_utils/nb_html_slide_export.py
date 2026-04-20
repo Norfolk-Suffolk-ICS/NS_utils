@@ -95,9 +95,6 @@ def _get_slide_styles():
         .nav-btn:hover { background: #053050; transform: scale(1.05); }
         .nav-btn:disabled { background: #ccc; cursor: not-allowed; transform: scale(1); }
         .slide-counter { color: white; font-size: 1.1em; font-weight: 600; }
-        
-        /* Keyboard hint - MOVED TO BOTTOM LEFT */
-        .keyboard-hint {position: fixed; bottom: 30px; left: 30px; color: black; padding: 10px 15px; border-radius: 8px; font-size: 0.9em; opacity: 0.6; z-index: 999;}
     </style>
     """
 
@@ -165,8 +162,8 @@ def _load_asset_as_base64(filename: str) -> str:
     
     if os.path.exists(asset_path):
         with open(asset_path, 'rb') as f:
-            return f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
-    return ""
+            image_content = {base64.b64encode(f.read()).decode()}
+    return image_content
 
 
 def _extract_title_from_notebook(notebook_path: str):
@@ -319,20 +316,18 @@ def convert_notebook_to_slides_html(notebook_path: str, exclude_input_cells: boo
         slide_styles,
         '</head>',
         '<body>',
-        '<div class="keyboard-hint">Use ← → arrows or click buttons to navigate</div>',
         '<div class="slide-container">'
     ]
     
     # First slide - image
-    if first_slide_img:
-        html_parts.extend([
-            '    <div class="slide first-image-slide active">',
-            f'        <img src="{first_slide_img}" alt="First Slide">',
-            '    </div>'
-        ])
+    html_parts.extend([
+        '    <div class="slide first-image-slide active">',
+        f'        <img src="{first_slide_img}" alt="First Slide">',
+        '    </div>'
+    ])
     
     # Title slide with background
-    title_slide_style = f'style="background-image: url({slide_bg_img});"' if slide_bg_img else ''
+    title_slide_style = f'style="background-image: url({slide_bg_img});"'
     
     if slides and slides[0][1] is None:
         first_slide_cells, _ = slides.pop(0)
