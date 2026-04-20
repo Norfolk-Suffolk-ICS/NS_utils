@@ -163,7 +163,8 @@ def _load_asset_as_base64(filename: str) -> str:
     if os.path.exists(asset_path):
         with open(asset_path, 'rb') as f:
             image_content = base64.b64encode(f.read()).decode()
-    return image_content
+            return f"data:image/png;base64,{image_content}"
+    return ""  # Return empty string if file not found
 
 
 def _extract_title_from_notebook(notebook_path: str):
