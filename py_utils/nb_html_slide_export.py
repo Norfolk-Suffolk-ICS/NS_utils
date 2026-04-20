@@ -154,19 +154,6 @@ def _generate_slide_navigation():
     """
 ############################################################################################################################
 
-
-def _load_asset_as_base64(filename: str) -> str:
-    """Load an image from assets folder and return as base64 data URI."""
-    package_dir = os.path.dirname(os.path.abspath(__file__))
-    asset_path = os.path.join(package_dir, 'assets', filename)
-    
-    if os.path.exists(asset_path):
-        with open(asset_path, 'rb') as f:
-            image_content = base64.b64encode(f.read()).decode()
-            return f"data:image/png;base64,{image_content}"
-    return ""  # Return empty string if file not found
-
-
 def _extract_title_from_notebook(notebook_path: str):
     """Extract H1 title from notebook."""
     with open(notebook_path, 'r', encoding="utf-8") as f:
@@ -269,23 +256,27 @@ def _generate_table_of_contents(notebook_path: str):
 def convert_notebook_to_slides_html(notebook_path: str, exclude_input_cells: bool = True, make_table_of_contents: bool = True) -> str:
     """Converts a Jupyter notebook to an HTML slideshow presentation."""
 
-    # Load assets
-    first_slide_img = _load_asset_as_base64('first_slide.png')
-    slide_bg_img = _load_asset_as_base64('slide_bg.png')
-    
-    # Try to find and encode logo
+    # Get package directory (where this Python file is located)
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+    assets_dir = os.path.join(package_dir, 'assets')
+    # Load logo
     logo_base64 = ""
-    notebook_dir = os.path.dirname(os.path.abspath(notebook_path))
-    
-    # Try same directory
-    logo_path = os.path.join(notebook_dir, 'NS_IF_Logo.png')
-    if not os.path.exists(logo_path):
-        # Try parent directory
-        logo_path = os.path.join(os.path.dirname(notebook_dir), 'NS_IF_Logo.png')
-    
+    logo_path = os.path.join(assets_dir, 'NS_IF_Logo.png')
     if os.path.exists(logo_path):
         with open(logo_path, 'rb') as f:
             logo_base64 = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
+    # Load first slide image
+    first_slide_img = ""
+    first_slide_path = os.path.join(assets_dir, 'main_slide.png')
+    if os.path.exists(first_slide_path):
+        with open(first_slide_path, 'rb') as f:
+            first_slide_img = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
+    # Load background image
+    slide_bg_img = ""
+    bg_path = os.path.join(assets_dir, 'title_slide_bg.png')
+    if os.path.exists(bg_path):
+        with open(bg_path, 'rb') as f:
+            slide_bg_img = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
 
     # Logo HTML - create once
     logo_html = f'<a href="https://www.intelligencefunction.org" target="_blank"><img src="{logo_base64}" class="slide-logo" alt="Logo"></a>' if logo_base64 else ''
@@ -350,7 +341,6 @@ def convert_notebook_to_slides_html(notebook_path: str, exclude_input_cells: boo
         if slide_titles:
             html_parts.extend([
                 '    <div class="slide toc-slide">',
-                logo_html,
                 '        <h2>Table of Contents</h2>',
                 f'        {toc}',
                 '    </div>'
