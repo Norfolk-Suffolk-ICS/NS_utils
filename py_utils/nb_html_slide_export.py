@@ -321,33 +321,28 @@ def convert_notebook_to_slides_html(notebook_path: str, exclude_input_cells: boo
     ]
     
     # First slide - image
+    if first_slide_img:
+        html_parts.extend([
+            '    <div class="slide first-image-slide active">',
+            f'        <img src="{first_slide_img}" alt="First Slide">',
+            '    </div>'
+        ])
+    
+    # Title slide with background - ONLY add background if image exists
+    title_slide_style = f'style="background-image: url({slide_bg_img});"' if slide_bg_img else ''
+    
+    # Remove the first slide content if it exists (content before first ##)
+    if slides and slides[0][1] is None:
+        slides.pop(0)
+    
+    # Create title slide
     html_parts.extend([
-        '    <div class="slide first-image-slide active">',
-        f'        <img src="{first_slide_img}" alt="First Slide">',
+        f'    <div class="slide title-slide" {title_slide_style}>',
+        logo_html,
+        f'        <h1>{title}</h1>',
+        '        <p style="font-size: 1.2em; margin-top: 30px;">Website: <a href="https://www.intelligencefunction.org" target="_blank">The Intelligence Function</a></p>',
         '    </div>'
     ])
-    
-    # Title slide with background
-    title_slide_style = f'style="background-image: url({slide_bg_img});"'
-    
-    if slides and slides[0][1] is None:
-        first_slide_cells, _ = slides.pop(0)
-        (body, _) = html_exporter.from_notebook_node(nbformat.v4.new_notebook(cells=first_slide_cells))
-        html_parts.extend([
-            f'    <div class="slide title-slide" {title_slide_style}>',
-            logo_html,
-            f'        {body}',
-            '        <p style="font-size: 1.2em; margin-top: 30px;">Website: <a href="https://www.intelligencefunction.org" target="_blank">The Intelligence Function</a></p>',
-            '    </div>'
-        ])
-    else:
-        html_parts.extend([
-            f'    <div class="slide title-slide" {title_slide_style}>',
-            logo_html,
-            f'        <h1>{title}</h1>',
-            '        <p style="font-size: 1.2em; margin-top: 30px;">Website: <a href="https://www.intelligencefunction.org" target="_blank">The Intelligence Function</a></p>',
-            '    </div>'
-        ])
     
     # Table of contents slide
     if make_table_of_contents:
