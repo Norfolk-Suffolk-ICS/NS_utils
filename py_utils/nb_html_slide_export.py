@@ -56,11 +56,9 @@ def _get_slide_styles():
             background-repeat: no-repeat;
         }
         .slide.first-image-slide img {
-            max-width: 100%;
-            max-height: 100%;
+            max-width: 100% !important;
+            max-height: 100% !important;
             object-fit: contain;
-            border-radius: 0;
-            box-shadow: none;
         }
         
         /* Logo - TOP RIGHT */
