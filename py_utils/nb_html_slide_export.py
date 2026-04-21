@@ -46,7 +46,7 @@ def _get_slide_styles():
             justify-content: center;
             align-items: center;
             padding: 0;
-            background: white;
+            background: red;
         }
         .slide.first-image-slide img {
             max-width: 100%;
@@ -108,6 +108,8 @@ def _get_slide_scripts():
         function initSlides() {
             const slides = document.querySelectorAll('.slide');
             totalSlides = slides.length;
+            console.log('Total slides:', totalSlides);
+            console.log('Starting at slide 0');  
             document.getElementById('total-slides').textContent = totalSlides;
             showSlide(0);
         }
@@ -329,9 +331,9 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
     html_parts.extend([
         f'    <div class="slide title-slide" {title_slide_style}>',
         logo_html,
-        f'        <h1>{title}</h1>',
-        '        <p style="font-size: 1.2em; margin-top: 30px;">Website: <a href="https://www.intelligencefunction.org" target="_blank">The Intelligence Function</a></p>',
-        f'        <h3>Author: {author_name}</h3>',  # ADDED COMMA
+        f'       <h1>{title}</h1>',
+        '        <h3 margin-top: 30px;">Website: <a href="https://www.intelligencefunction.org" target="_blank">The Intelligence Function</a></h3>',
+        f'       <h3>Author: {author_name}</h3>',
         '    </div>'
     ])
     
