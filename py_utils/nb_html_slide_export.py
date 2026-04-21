@@ -58,9 +58,9 @@ def _get_slide_styles():
         .slide-logo {
             position: absolute;
             top: 20px;
-            right: 30px;
-            max-width: 210px;
-            max-height: 140px;
+            right: 40px;
+            max-width: 250px;
+            max-height: 150px;
             z-index: 100;
         }
         
@@ -90,7 +90,7 @@ def _get_slide_styles():
         .toc-list { list-style: none; margin-left: 0; font-size: 1.4em; }
         .toc-list li { padding: 15px 20px; margin: 10px 0; background: #f0f0f0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
         .toc-list li:hover { background: #e0e0e0; transform: translateX(10px); }
-        .slide-controls { position: fixed; bottom: 30px; right: 30px; display: flex; align-items: center; gap: 20px; background: rgba(0,0,0,0.7); padding: 15px 25px; border-radius: 50px; z-index: 1000; }
+        .slide-controls { position: fixed; bottom: 30px; right: 30px; display: flex; align-items: center; gap: 20px; background: rgba(0,0,0,0.7); padding: 10px 15px; border-radius: 50px; z-index: 1000; }
         .nav-btn { background: #064169; color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-size: 1em; transition: all 0.3s ease; font-weight: 600; }
         .nav-btn:hover { background: #053050; transform: scale(1.05); }
         .nav-btn:disabled { background: #ccc; cursor: not-allowed; transform: scale(1); }
@@ -267,14 +267,14 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
     
     # Load first slide image
     first_slide_img = ""
-    first_slide_path = os.path.join(assets_dir, 'first_slide.png')
+    first_slide_path = os.path.join(assets_dir, 'main_slide.png')
     if os.path.exists(first_slide_path):
         with open(first_slide_path, 'rb') as f:
             first_slide_img = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
     
     # Load background image
     slide_bg_img = ""
-    bg_path = os.path.join(assets_dir, 'slide_bg.png')
+    bg_path = os.path.join(assets_dir, 'title_slide_bg.png')
     if os.path.exists(bg_path):
         with open(bg_path, 'rb') as f:
             slide_bg_img = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
@@ -309,19 +309,22 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
         slide_styles,
         '</head>',
         '<body>',
+        '<div class="keyboard-hint">Use ← → arrows or click buttons to navigate</div>',
         '<div class="slide-container">'
     ]
 
-    # Remove content before first ## (we already used it for title)
-    if slides and slides[0][1] is None:
+    # ALWAYS remove first element if it exists (content before first ##)
+    # This prevents duplication whether notebook starts with # or ##
+    if slides and len(slides) > 0:
         slides.pop(0)
     
     # SLIDE 1: First image slide
-    html_parts.extend([
-        '    <div class="slide first-image-slide active">',
-        f'        <img src="{first_slide_img}" alt="First Slide">',
-        '    </div>'
-    ])
+    if first_slide_img:
+        html_parts.extend([
+            '    <div class="slide first-image-slide active">',
+            f'        <img src="{first_slide_img}" alt="First Slide">',
+            '    </div>'
+        ])
     
     # SLIDE 2: Title slide with background
     title_slide_style = f'style="background-image: url({slide_bg_img});"' if slide_bg_img else ''
@@ -330,7 +333,7 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
         logo_html,
         f'        <h1>{title}</h1>',
         '        <p style="font-size: 1.2em; margin-top: 30px;">Website: <a href="https://www.intelligencefunction.org" target="_blank">The Intelligence Function</a></p>',
-        '       <h3>Author: {author_name}</h3>'
+        f'        <h3>Author: {author_name}</h3>',  # ADDED COMMA
         '    </div>'
     ])
     
@@ -340,6 +343,7 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
         if slide_titles:
             html_parts.extend([
                 '    <div class="slide toc-slide">',
+                logo_html,
                 '        <h2>Table of Contents</h2>',
                 f'        {toc}',
                 '    </div>'
