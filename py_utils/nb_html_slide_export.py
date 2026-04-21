@@ -23,33 +23,46 @@ def _get_slide_styles():
             width: 100%; 
             height: 100%; 
             position: absolute; 
-            top: 0;
-            left: 0;
+            top: 5px; 
+            left: 5px;
             padding: 60px 80px; 
             background: white; 
             display: none; 
             overflow-y: auto; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
         }
         .slide.active { display: block; }
         
-        /* Title and first image slides */
-        .slide.title-slide.active,
-        .slide.first-image-slide.active { 
+        /* Title slide - only flex when active */
+        .slide.title-slide.active { 
             display: flex;
+            flex-direction: column; 
             justify-content: center; 
             align-items: center;
         }
-        .slide.title-slide.active { flex-direction: column; }
-        .slide.title-slide,
-        .slide.first-image-slide {
+        .slide.title-slide {
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
         }
-        .slide.first-image-slide { padding: 0; }
-        .slide.first-image-slide img { display: none; }
         
-        /* Logo */
+        /* First image slide - full background stretch */
+        .slide.first-image-slide.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .slide.first-image-slide {
+            padding: 0;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .slide.first-image-slide img {
+            display: none; /* Hide the img tag since we're using background-image */
+        }
+        
+        /* Logo - TOP RIGHT */
         .slide-logo {
             position: absolute;
             top: 20px;
@@ -66,8 +79,9 @@ def _get_slide_styles():
         .slide ul, .slide ol { font-size: 1.5em !important; margin-left: 2em; margin-bottom: 0.5em; line-height: 1.5; display: inline-block; text-align: left; }
         a {color: #0000EE !important;}
 
-        /* Code blocks */
-        .slide pre { background: #f8f9fa; border-left: 4px solid #064169; padding: 20px; margin: 20px auto; overflow-x: auto; border-radius: 6px; max-width: 90%; }
+        /* Media - exclude logo from general img styling */
+        .slide img:not(.slide-logo) { max-height: 500px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .slide pre { background: #f8f9fa; border-left: 4px solid #064169; padding: 20px; margin: 20px auto; overflow-x: auto; border-radius: 6px; font-size: 0.95em; max-width: 90%; text-align: left; }
         .slide code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
         
         /* Tables */
@@ -76,11 +90,14 @@ def _get_slide_styles():
         .slide table td { padding: 10px 12px; border-bottom: 1px solid #e0e0e0; }
         .slide table tr:nth-child(even) { background: #f8f9fa; }
         
+        /* Output areas */
+        .output_area, .output_subarea { margin: 20px auto; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .plotly-graph-div, .vega-embed { margin: 20px auto !important; display: block; }
+        
         /* Navigation */
         .toc-list { list-style: none; margin-left: 0; font-size: 1.4em; }
         .toc-list li { padding: 15px 20px; margin: 10px 0; background: #f0f0f0; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
         .toc-list li:hover { background: #e0e0e0; transform: translateX(10px); }
-        
         .slide-controls { position: fixed; bottom: 30px; right: 30px; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.7); padding: 10px 15px; border-radius: 50px; z-index: 1000; }
         .nav-btn { background: #064169; color: white; border: none; padding: 8px 15px; border-radius: 25px; cursor: pointer; font-size: 1em; transition: all 0.3s; font-weight: 600; }
         .nav-btn:hover { background: #053050; transform: scale(1.05); }
@@ -272,6 +289,13 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
         with open(bg_path, 'rb') as f:
             slide_bg_img = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
 
+    # Load Last slide image
+    first_slide_img1 = ""
+    first_slide_path1 = os.path.join(assets_dir, 'first_slide.png')
+    if os.path.exists(first_slide_path1):
+        with open(first_slide_path1, 'rb') as f:
+            first_slide_img1 = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
+
     # Logo HTML
     logo_html = f'<a href="https://www.intelligencefunction.org" target="_blank"><img src="{logo_base64}" class="slide-logo" alt="Logo"></a>' if logo_base64 else ''
 
@@ -347,6 +371,13 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
             '    </div>'
         ])
     
+    # SLIDE Last: Last image slide
+    html_parts.extend([
+        '    <div class="slide first-image-slide active">',
+        f'        <img src="{first_slide_img1}" alt="First Slide">',
+        '    </div>'
+    ])
+
     html_parts.extend([
         '</div>',
         _generate_slide_navigation(),
