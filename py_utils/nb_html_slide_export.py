@@ -46,7 +46,7 @@ def _get_slide_styles():
             background-repeat: no-repeat;
         }
         
-        /* First image slide - full background stretch */
+        /* First image slide - only flex when active */
         .slide.first-image-slide.active {
             display: flex;
             justify-content: center;
@@ -54,12 +54,12 @@ def _get_slide_styles():
         }
         .slide.first-image-slide {
             padding: 0;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
+            background: white;
         }
         .slide.first-image-slide img {
-            display: none; /* Hide the img tag since we're using background-image */
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
         }
         
         /* Logo - TOP RIGHT */
@@ -96,10 +96,10 @@ def _get_slide_styles():
         
         /* Navigation */
         .toc-list { list-style: none; margin-left: 0; font-size: 1.4em; }
-        .toc-list li { padding: 15px 20px; margin: 10px 0; background: #f0f0f0; border-radius: 8px; cursor: pointer; transition: all 0.3s; }
+        .toc-list li { padding: 15px 20px; margin: 10px 0; background: #f0f0f0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
         .toc-list li:hover { background: #e0e0e0; transform: translateX(10px); }
         .slide-controls { position: fixed; bottom: 30px; right: 30px; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.7); padding: 10px 15px; border-radius: 50px; z-index: 1000; }
-        .nav-btn { background: #064169; color: white; border: none; padding: 8px 15px; border-radius: 25px; cursor: pointer; font-size: 1em; transition: all 0.3s; font-weight: 600; }
+        .nav-btn { background: #064169; color: white; border: none; padding: 8px 15px; border-radius: 25px; cursor: pointer; font-size: 1em; transition: all 0.3s ease; font-weight: 600; }
         .nav-btn:hover { background: #053050; transform: scale(1.05); }
         .nav-btn:disabled { background: #ccc; cursor: not-allowed; transform: scale(1); }
         .slide-counter { color: white; font-size: 1.1em; font-weight: 600; }
