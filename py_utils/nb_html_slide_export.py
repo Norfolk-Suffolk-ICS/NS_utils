@@ -32,19 +32,27 @@ def _get_slide_styles():
             box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
         }
         .slide.active { display: block; }
-        .slide.title-slide { 
-            display: flex; 
+        
+        /* Title slide - only flex when active */
+        .slide.title-slide.active { 
+            display: flex;
             flex-direction: column; 
             justify-content: center; 
             align-items: center;
+        }
+        .slide.title-slide {
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
         }
-        .slide.first-image-slide {
+        
+        /* First image slide - only flex when active */
+        .slide.first-image-slide.active {
             display: flex;
             justify-content: center;
             align-items: center;
+        }
+        .slide.first-image-slide {
             padding: 0;
             background: red;
         }
@@ -320,11 +328,9 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
         slides.pop(0)
     
     # SLIDE 1: First image slide
-    main_slide_style = f'style="background-image: url({first_slide_img});"' if first_slide_img else ''
     html_parts.extend([
-        f'    <div class="slide first-image-slide active" {main_slide_style}>',
-        #f'        <img src="{first_slide_img}" alt="First Slide">',
-        f'     <h1>{title}</h1>',
+        '    <div class="slide first-image-slide active">',
+        f'        <img src="{first_slide_img}" alt="First Slide">',
         '    </div>'
     ])
     
@@ -333,8 +339,8 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
     html_parts.extend([
         f'    <div class="slide title-slide" {title_slide_style}>',
         f'       <h1>{title}</h1>',
-        '        <h4 style="margin-top: 30px; text-align: left;">Website: <a href="https://www.intelligencefunction.org" target="_blank"><u>The Intelligence Function</u></a></h4>',
-        f'       <h4 style="text-align: left;">Author: {author_name}</h4>',
+        '        <h4 style="margin-top: 30px; text-align: left !important;">Website: <a href="https://www.intelligencefunction.org" target="_blank"><u>The Intelligence Function</u></a></h4>',
+        f'       <h4 style="text-align: left !important;">Author: {author_name}</h4>',
         '    </div>'
     ])
     
