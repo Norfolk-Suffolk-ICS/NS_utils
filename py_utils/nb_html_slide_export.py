@@ -316,13 +316,15 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
 
     # ALWAYS remove first element if it exists (content before first ##)
     # This prevents duplication whether notebook starts with # or ##
-    # if slides and len(slides) > 0:
-    #     slides.pop(0)
+    if slides and len(slides) > 0:
+        slides.pop(0)
     
     # SLIDE 1: First image slide
+    main_slide_style = f'style="background-image: url({first_slide_img});"' if first_slide_img else ''
     html_parts.extend([
-        '    <div class="slide first-image-slide active">',
-        f'        <img src="{first_slide_img}" alt="First Slide">',
+        f'    <div class="slide first-image-slide active" {main_slide_style}>',
+        #f'        <img src="{first_slide_img}" alt="First Slide">',
+        f'     <h1>{title}</h1>',
         '    </div>'
     ])
     
@@ -330,7 +332,6 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
     title_slide_style = f'style="background-image: url({slide_bg_img});"' if slide_bg_img else ''
     html_parts.extend([
         f'    <div class="slide title-slide" {title_slide_style}>',
-        logo_html,
         f'       <h1>{title}</h1>',
         '        <h4 style="margin-top: 30px; text-align: left;">Website: <a href="https://www.intelligencefunction.org" target="_blank"><u>The Intelligence Function</u></a></h4>',
         f'       <h4 style="text-align: left;">Author: {author_name}</h4>',
