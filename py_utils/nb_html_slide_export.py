@@ -251,7 +251,7 @@ def _generate_table_of_contents(notebook_path: str):
     return toc_html, slide_titles
 
 
-def convert_notebook_to_slides_html(notebook_path: str, exclude_input_cells: bool = True, make_table_of_contents: bool = True) -> str:
+def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclude_input_cells: bool = True, make_table_of_contents: bool = True) -> str:
     """Converts a Jupyter notebook to an HTML slideshow presentation."""
 
     # Get package directory (where this Python file is located)
@@ -311,6 +311,10 @@ def convert_notebook_to_slides_html(notebook_path: str, exclude_input_cells: boo
         '<body>',
         '<div class="slide-container">'
     ]
+
+    # Remove content before first ## (we already used it for title)
+    if slides and slides[0][1] is None:
+        slides.pop(0)
     
     # SLIDE 1: First image slide
     html_parts.extend([
@@ -326,12 +330,9 @@ def convert_notebook_to_slides_html(notebook_path: str, exclude_input_cells: boo
         logo_html,
         f'        <h1>{title}</h1>',
         '        <p style="font-size: 1.2em; margin-top: 30px;">Website: <a href="https://www.intelligencefunction.org" target="_blank">The Intelligence Function</a></p>',
+        '       <h3>Author: {author_name}</h3>'
         '    </div>'
     ])
-    
-    # Remove content before first ## (we already used it for title)
-    if slides and slides[0][1] is None:
-        slides.pop(0)
     
     # SLIDE 3: Table of contents
     if make_table_of_contents:
