@@ -55,6 +55,9 @@ def _get_slide_styles():
             background-position: center;
             background-repeat: no-repeat;
         }
+        .slide.first-image-slide img { 
+            display: none; /* Hide img tag since we're using background-image */
+        }
         
         /* Logo - TOP RIGHT */
         .slide-logo {
@@ -109,9 +112,7 @@ def _get_slide_scripts():
         
         function initSlides() {
             const slides = document.querySelectorAll('.slide');
-            totalSlides = slides.length;
-            console.log('Total slides:', totalSlides);
-            console.log('Starting at slide 0');  
+            totalSlides = slides.length; 
             document.getElementById('total-slides').textContent = totalSlides;
             showSlide(0);
         }
