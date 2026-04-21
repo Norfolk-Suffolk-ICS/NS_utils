@@ -243,12 +243,10 @@ def _generate_table_of_contents(notebook_path: str):
                 if line.startswith('##') and not line.startswith('###'):
                     title = line.strip('#').strip()
                     slide_titles.append(title)
-    
     toc_lines = ['<ul class="toc-list">']
     for i, title in enumerate(slide_titles, 3):
         toc_lines.append(f'  <li onclick="goToSlide({i})">{title}</li>')
     toc_lines.append('</ul>')
-    
     toc_html = '\n'.join(toc_lines)
     return toc_html, slide_titles
 
@@ -260,46 +258,26 @@ def convert_notebook_to_slides_html(notebook_path: str, exclude_input_cells: boo
     package_dir = os.path.dirname(os.path.abspath(__file__))
     assets_dir = os.path.join(package_dir, 'assets')
     
-    # DEBUG - print to see what paths we're checking
-    print(f"Package dir: {package_dir}")
-    print(f"Assets dir: {assets_dir}")
-    print(f"Assets dir exists: {os.path.exists(assets_dir)}")
-    
     # Load logo
     logo_base64 = ""
     logo_path = os.path.join(assets_dir, 'NS_IF_Logo.png')
-    print(f"Logo path: {logo_path}")
-    print(f"Logo exists: {os.path.exists(logo_path)}")
     if os.path.exists(logo_path):
         with open(logo_path, 'rb') as f:
             logo_base64 = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
-            print("Logo loaded successfully")
-    else:
-        print("Logo NOT found")
     
     # Load first slide image
     first_slide_img = ""
     first_slide_path = os.path.join(assets_dir, 'first_slide.png')
-    print(f"First slide path: {first_slide_path}")
-    print(f"First slide exists: {os.path.exists(first_slide_path)}")
     if os.path.exists(first_slide_path):
         with open(first_slide_path, 'rb') as f:
             first_slide_img = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
-            print("First slide loaded successfully")
-    else:
-        print("First slide NOT found")
     
     # Load background image
     slide_bg_img = ""
     bg_path = os.path.join(assets_dir, 'slide_bg.png')
-    print(f"Background path: {bg_path}")
-    print(f"Background exists: {os.path.exists(bg_path)}")
     if os.path.exists(bg_path):
         with open(bg_path, 'rb') as f:
             slide_bg_img = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
-            print("Background loaded successfully")
-    else:
-        print("Background NOT found")
 
     # Logo HTML
     logo_html = f'<a href="https://www.intelligencefunction.org" target="_blank"><img src="{logo_base64}" class="slide-logo" alt="Logo"></a>' if logo_base64 else ''
@@ -334,22 +312,15 @@ def convert_notebook_to_slides_html(notebook_path: str, exclude_input_cells: boo
         '<div class="slide-container">'
     ]
     
-    # First slide - image
-    if first_slide_img:
-        html_parts.extend([
-            '    <div class="slide first-image-slide active">',
-            f'        <img src="{first_slide_img}" alt="First Slide">',
-            '    </div>'
-        ])
+    # SLIDE 1: First image slide
+    html_parts.extend([
+        '    <div class="slide first-image-slide active">',
+        f'        <img src="{first_slide_img}" alt="First Slide">',
+        '    </div>'
+    ])
     
-    # Title slide with background - ONLY add background if image exists
+    # SLIDE 2: Title slide with background
     title_slide_style = f'style="background-image: url({slide_bg_img});"' if slide_bg_img else ''
-    
-    # Remove the first slide content if it exists (content before first ##)
-    if slides and slides[0][1] is None:
-        slides.pop(0)
-    
-    # Create title slide
     html_parts.extend([
         f'    <div class="slide title-slide" {title_slide_style}>',
         logo_html,
@@ -358,7 +329,11 @@ def convert_notebook_to_slides_html(notebook_path: str, exclude_input_cells: boo
         '    </div>'
     ])
     
-    # Table of contents slide
+    # Remove content before first ## (we already used it for title)
+    if slides and slides[0][1] is None:
+        slides.pop(0)
+    
+    # SLIDE 3: Table of contents
     if make_table_of_contents:
         toc, slide_titles = _generate_table_of_contents(notebook_path)
         if slide_titles:
@@ -369,7 +344,7 @@ def convert_notebook_to_slides_html(notebook_path: str, exclude_input_cells: boo
                 '    </div>'
             ])
     
-    # Add content slides
+    # SLIDES 4+: Content slides (each ## becomes a slide)
     for slide_cells, slide_title in slides:
         (body, _) = html_exporter.from_notebook_node(nbformat.v4.new_notebook(cells=slide_cells))
         html_parts.extend([
