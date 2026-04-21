@@ -55,8 +55,12 @@ def _get_slide_styles():
             background-position: center;
             background-repeat: no-repeat;
         }
-        .slide.first-image-slide img { 
-            display: none; /* Hide img tag since we're using background-image */
+        .slide.first-image-slide img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 0;
+            box-shadow: none;
         }
         
         /* Logo - TOP RIGHT */
