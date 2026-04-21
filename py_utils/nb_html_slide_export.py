@@ -23,8 +23,6 @@ def _get_slide_styles():
             width: 100%; 
             height: 100%; 
             position: absolute; 
-            top: 5px; 
-            left: 5px;
             padding: 60px 80px; 
             background: white; 
             display: none; 
@@ -53,13 +51,9 @@ def _get_slide_styles():
             align-items: center;
         }
         .slide.first-image-slide {
-            padding: 0;
-            background: white;
-        }
-        .slide.first-image-slide img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
         }
         
         /* Logo - TOP RIGHT */
