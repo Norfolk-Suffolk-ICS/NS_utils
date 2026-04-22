@@ -190,7 +190,7 @@ def convert_notebook_to_html_string(notebook_path:str, author_name:str, exclude_
             for i, line in enumerate(lines):
                 if line.startswith('#') and not line.startswith('##'):
                     lines.insert(i + 1, '\n*Website: <a href="https://www.intelligencefunction.org" target="_blank">The Intelligence Function</a>*\n')
-                    lines.insert(i + 1, f'\n<p>Author: {author_name}</p>*\n')
+                    lines.insert(i + 2, f'\n<p>Author: {author_name}</p>*\n')
                     cell.source = '\n'.join(lines)
                     break
             break
