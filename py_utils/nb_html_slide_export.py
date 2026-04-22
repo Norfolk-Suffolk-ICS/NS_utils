@@ -212,11 +212,12 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
             current_slide_cells.append(cell)
     
     if current_slide_cells:
-        current_slide_cells.append(nbformat.v4.new_markdown_cell('---'))
         if found_first_h2:
             slides.append((current_slide_cells, current_slide_title))
+            current_slide_cells.append(nbformat.v4.new_markdown_cell('---'))
         else:
             slides.append((current_slide_cells, None))
+            current_slide_cells.append(nbformat.v4.new_markdown_cell('---'))
     
     return slides
 

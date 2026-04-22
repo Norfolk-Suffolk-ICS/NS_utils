@@ -41,9 +41,16 @@ def _get_custom_styles() -> str:
     .slide-logo {
         position: absolute;
         top: 20px;
-        right: 100px;
-        max-width: 200px;
-        max-height: 120px;
+        right: 5px;
+        max-width: 280px;
+        z-index: 100;
+    }
+    .slide-logo-bottom {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        width: 600px;
+        height: 200px;
         z-index: 100;
     }
     #go-to-top {
@@ -171,6 +178,7 @@ def convert_notebook_to_html_string(notebook_path:str, author_name:str, exclude_
     
     # Logo HTML
     logo_html = f'<a href="https://www.intelligencefunction.org" target="_blank"><img src="{logo_base64}" class="slide-logo" alt="Logo"></a>' if logo_base64 else ''
+    logo_html_bottom = f'<a href="https://www.intelligencefunction.org" target="_blank"><img src="{logo_base64}" class="slide-logo-bottom" alt="Logo"></a>' if logo_base64 else ''
     
     # Read notebook to add website link
     with open(notebook_path, 'r', encoding='utf-8') as f:
@@ -230,12 +238,12 @@ def convert_notebook_to_html_string(notebook_path:str, author_name:str, exclude_
     # Add Go to Top button
     go_to_top_button = '<button id="go-to-top" onclick="scrollToTop()">↑</button>\n'
     
-    # Add button before closing body tag
+    # Add bottom logo and button before closing body tag
     if '</body>' in body:
-        body = body.replace('</body>', f'{go_to_top_button}{scroll_script}\n</body>')
+        body = body.replace('</body>', f'{logo_html_bottom}{go_to_top_button}{scroll_script}\n</body>')
     else:
         # If no body tag, append to the end
-        body = body + go_to_top_button + scroll_script
+        body = body + logo_html_bottom + go_to_top_button + scroll_script
 
     if make_table_of_contents:
         # Generating TOC
