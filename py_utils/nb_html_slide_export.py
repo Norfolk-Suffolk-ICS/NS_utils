@@ -56,8 +56,9 @@ def _get_slide_styles():
         }
         
         .slide h1 { font-size: 5.5em !important; margin-bottom: 0.5em; font-weight: 800 !important; color: #064169; text-align: left; }
-        .slide h2 { font-size: 3.5em !important; margin-bottom: 0.5em; color: #064169; border-bottom: 3px solid #064169; padding-bottom: 0.2em; }
+        .slide h2 { font-size: 3.5em !important; margin-bottom: 0.5em; color: #064169; }
         .slide h3 { font-size: 2.5em !important; margin-bottom: 0.5em; color: #064169; border-bottom: 3px solid #064169; padding-bottom: 0.2em; }
+        .slide h4 { font-size: 2em !important; margin-bottom: 0.5em; color: #064169; }
         .slide p { font-size: 1.5em !important; line-height: 1.5; margin-bottom: 0.5em; }
         .slide ul, .slide ol { font-size: 1.5em !important; margin-left: 2em; margin-bottom: 0.5em; line-height: 1.5; display: inline-block; text-align: left; }
         a {color: #0000EE !important;}
@@ -340,8 +341,8 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
         f'    <div class="slide before-toc-slide" {title_slide_style}>',
         logo_html,
         f'       <h1>{title}</h1>',
-        '        <h3>Website: <a href="https://www.intelligencefunction.org" target="_blank"><u>The Intelligence Function</u></a></h3>',
-        f'       <h3>{author_name}</h3>',
+        '        <h4>Website: <a href="https://www.intelligencefunction.org" target="_blank"><u>The Intelligence Function</u></a></h4>',
+        f'       <h4>{author_name}</h4>',
         '    </div>'
     ])
     
