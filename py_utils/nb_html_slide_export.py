@@ -41,8 +41,9 @@ def _get_slide_styles():
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: left;
-            padding: 80px;
+            align-items: flex-start;
+            padding-left: 400px;
+            padding-right: 50px;
         }
         
         /* Logo - TOP RIGHT */
@@ -55,7 +56,7 @@ def _get_slide_styles():
             z-index: 100;
         }
         
-        .slide h1 { font-size: 5.5em !important; margin-bottom: 0.5em; font-weight: 800 !important; color: #064169; }
+        .slide h1 { font-size: 5.5em !important; margin-bottom: 0.5em; font-weight: 800 !important; color: #064169; text-align: left; }
         .slide h2 { font-size: 3.5em !important; margin-bottom: 0.5em; color: #064169; border-bottom: 3px solid #064169; padding-bottom: 0.2em; }
         .slide h3 { font-size: 2.5em !important; margin-top: 1em; margin-bottom: 0.5em; color: #064169; }
         .slide p { font-size: 1.5em !important; line-height: 1.5; margin-bottom: 0.5em; }
@@ -338,6 +339,7 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
         if slide_titles:
             html_parts.extend([
                 '    <div class="slide toc-slide">',
+                    logo_html,
                 '        <h2>Table of Contents</h2>',
                 f'        {toc}',
                 '    </div>'
@@ -348,6 +350,7 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
         (body, _) = html_exporter.from_notebook_node(nbformat.v4.new_notebook(cells=slide_cells))
         html_parts.extend([
             '    <div class="slide content-slide">',
+                logo_html,
             f'        {body}',
             '    </div>'
         ])
