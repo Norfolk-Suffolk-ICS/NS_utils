@@ -43,15 +43,14 @@ def _get_custom_styles() -> str:
         top: 20px;
         right: 5px;
         max-width: 280px;
+        max-height: 150px;
         z-index: 100;
     }
     .slide-logo-bottom {
-        position: absolute;
-        bottom: 20px;
-        left: 50%;
+        display: block;
+        margin: 50px auto 20px auto;
         width: 600px;
         height: 200px;
-        z-index: 100;
     }
     #go-to-top {
         position: fixed;

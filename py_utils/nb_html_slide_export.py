@@ -16,6 +16,7 @@ def _get_slide_styles():
             background: #f5f5f5;
             color: #333;
             overflow: hidden !important;
+            padding: 0px !important
         }
         
         .slide-container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
@@ -214,7 +215,6 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
     if current_slide_cells:
         if found_first_h2:
             slides.append((current_slide_cells, current_slide_title))
-            current_slide_cells.append(nbformat.v4.new_markdown_cell('---'))
         else:
             slides.append((current_slide_cells, None))
             current_slide_cells.append(nbformat.v4.new_markdown_cell('---'))
