@@ -142,7 +142,7 @@ def _generate_table_of_contents(notebook_path:str)->str:
         if cell.cell_type == 'markdown':
             lines = cell.source.split('\n')
             for line in lines:
-                if line.startswith('##'):
+                if line.startswith('##') and not line.startswith('###'):
                     # Counting number of hashes to detemine heading level
                     level = line.count('#')
                     title = line.strip('#').strip()
