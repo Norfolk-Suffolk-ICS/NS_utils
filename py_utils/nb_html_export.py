@@ -1,5 +1,7 @@
 import nbformat
 from nbconvert import HTMLExporter
+import os
+import base64
 
 __all__ = ["convert_notebook_to_html_string","write_notebook_to_html"]
 
@@ -149,6 +151,19 @@ def convert_notebook_to_html_string(notebook_path:str, exclude_input_cells=True,
           make_table_of_contents:bool, whether to make & include a table of contents
     Returns: A string containing the notebook html
     """
+    # Get package directory and load logo
+    package_dir = os.path.dirname(os.path.abspath(__file__))
+    assets_dir = os.path.join(package_dir, 'assets')
+    
+    logo_base64 = ""
+    logo_path = os.path.join(assets_dir, 'NS_IF_Logo.png')
+    if os.path.exists(logo_path):
+        with open(logo_path, 'rb') as f:
+            logo_base64 = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
+    
+    # Logo HTML
+    logo_html = f'<a href="https://www.intelligencefunction.org" target="_blank"><img src="{logo_base64}" class="slide-logo" alt="Logo"></a>' if logo_base64 else ''
+    
     # Read notebook to add website link
     with open(notebook_path, 'r', encoding='utf-8') as f:
         nb = nbformat.read(f, as_version=4)
@@ -195,6 +210,13 @@ def convert_notebook_to_html_string(notebook_path:str, exclude_input_cells=True,
     else:
         # If no head tag, prepend everything
         body = plotly_script_tag + custom_styles + body
+
+    # Add logo at the top of the body
+    if '<body>' in body:
+        body = body.replace('<body>', f'<body>\n{logo_html}\n')
+    else:
+        # If no body tag, prepend logo to content
+        body = logo_html + body
 
     # Add Go to Top button
     go_to_top_button = '<button id="go-to-top" onclick="scrollToTop()">↑</button>\n'

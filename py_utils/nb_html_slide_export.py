@@ -26,8 +26,7 @@ def _get_slide_styles():
             padding: 60px 80px; 
             background: white; 
             display: none; 
-            overflow-y: auto; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2); 
+            overflow-y: auto;
         }
         .slide.active { display: block; }
         
