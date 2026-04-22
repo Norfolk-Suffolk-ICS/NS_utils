@@ -14,7 +14,6 @@ def _get_custom_styles() -> str:
         font-family: Arial;
         margin-left: 20%;
         width: 70% !important;
-        display: flex;
     }
     #toc {
         position: fixed;
@@ -237,7 +236,7 @@ def convert_notebook_to_html_string(notebook_path:str, author_name:str, exclude_
     # Add Go to Top button
     go_to_top_button = '<button id="go-to-top" onclick="scrollToTop()">↑</button>\n'
     
-    # Add bottom logo and button before closing body tag
+    # Add button before closing body tag
     if '</body>' in body:
         body = body.replace('</body>', f'{go_to_top_button}{scroll_script}\n</body>')
     else:

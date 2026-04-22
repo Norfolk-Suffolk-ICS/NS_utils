@@ -161,50 +161,72 @@ def _extract_title_from_notebook(notebook_path: str):
 
 
 def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = True):
-    """Split notebook into slides based on ## markdown headers."""
+    """Split notebook into slides based on ### headers, with ## creating special background slides."""
     with open(notebook_path, 'r', encoding="utf-8") as f:
         nb = nbformat.read(f, as_version=4)
     
     slides = []
     current_slide_cells = []
     current_slide_title = None
-    found_first_h2 = False
+    found_first_h3 = False
     
     for cell in nb['cells']:
         if cell.cell_type == 'markdown':
             lines = cell.source.split('\n')
             
-            # Find ALL ## headers in this cell
+            # Find ## headers (for special background slides)
             h2_positions = []
             for i, line in enumerate(lines):
                 if line.startswith('##') and not line.startswith('###'):
                     h2_positions.append(i)
             
+            # Find ### headers (for regular content slides)
+            h3_positions = []
+            for i, line in enumerate(lines):
+                if line.startswith('###') and not line.startswith('####'):
+                    h3_positions.append(i)
+            
+            # Process ## headers - create special section slides
             if h2_positions:
-                # This cell has one or more ## headers
-                for idx, h2_pos in enumerate(h2_positions):
-                    if idx + 1 < len(h2_positions):
-                        end_pos = h2_positions[idx + 1]
+                for h2_pos in h2_positions:
+                    # Save current slide if exists
+                    if current_slide_cells:
+                        slides.append((current_slide_cells, current_slide_title, 'content'))
+                        current_slide_cells = []
+                        current_slide_title = None
+                    
+                    # Get the ## text
+                    h2_title = lines[h2_pos].strip('#').strip()
+                    
+                    # Create special slide with just the ## header (marked as 'section')
+                    h2_cell = nbformat.v4.new_markdown_cell(f'<h1>{h2_title}</h1>')
+                    slides.append(([h2_cell], h2_title, 'section'))
+            
+            # Process ### headers - regular content slides
+            elif h3_positions:
+                for idx, h3_pos in enumerate(h3_positions):
+                    if idx + 1 < len(h3_positions):
+                        end_pos = h3_positions[idx + 1]
                     else:
                         end_pos = len(lines)
                     
-                    section_lines = lines[h2_pos:end_pos]
+                    section_lines = lines[h3_pos:end_pos]
                     section_content = '\n'.join(section_lines)
-                    h2_title = section_lines[0].strip('#').strip()
+                    h3_title = section_lines[0].strip('#').strip()
                     
                     section_cell = nbformat.v4.new_markdown_cell(section_content)
                     
-                    if found_first_h2:
+                    if found_first_h3:
                         if current_slide_cells:
-                            slides.append((current_slide_cells, current_slide_title))
+                            slides.append((current_slide_cells, current_slide_title, 'content'))
                         current_slide_cells = []
                     else:
                         if current_slide_cells:
-                            slides.append((current_slide_cells, None))
+                            slides.append((current_slide_cells, None, 'content'))
                         current_slide_cells = []
                     
-                    found_first_h2 = True
-                    current_slide_title = h2_title
+                    found_first_h3 = True
+                    current_slide_title = h3_title
                     current_slide_cells.append(section_cell)
             else:
                 current_slide_cells.append(cell)
@@ -212,11 +234,10 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
             current_slide_cells.append(cell)
     
     if current_slide_cells:
-        if found_first_h2:
-            slides.append((current_slide_cells, current_slide_title))
-            current_slide_cells.append(nbformat.v4.new_markdown_cell('---'))
+        if found_first_h3:
+            slides.append((current_slide_cells, current_slide_title, 'content'))
         else:
-            slides.append((current_slide_cells, None)) 
+            slides.append((current_slide_cells, None, 'content'))
     
     return slides
 
@@ -329,7 +350,7 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
         logo_html,
         f'       <h1>{title}</h1>',
         '        <h3>Website: <a href="https://www.intelligencefunction.org" target="_blank"><u>The Intelligence Function</u></a></h3>',
-        f'       <h3>Author: {author_name}</h3>',
+        f'       <h3>{author_name}</h3>',
         '    </div>'
     ])
     
@@ -345,15 +366,40 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
                 '    </div>'
             ])
     
-    # SLIDES 4+: Content slides (each ## becomes a slide)
-    for slide_cells, slide_title in slides:
-        (body, _) = html_exporter.from_notebook_node(nbformat.v4.new_notebook(cells=slide_cells))
-        html_parts.extend([
-            '    <div class="slide content-slide">',
+    # SLIDES 4+: Content slides (each ### becomes a slide, ## becomes special background slide)
+    for slide_data in slides:
+        if len(slide_data) == 3:
+            slide_cells, slide_title, slide_type = slide_data
+            
+            if slide_type == 'section':
+                # Special ## slide with background image
+                (body, _) = html_exporter.from_notebook_node(nbformat.v4.new_notebook(cells=slide_cells))
+                section_bg_style = f'style="background-image: url({slide_bg_img});"' if slide_bg_img else ''
+                html_parts.extend([
+                    f'    <div class="slide before-toc-slide" {section_bg_style}>',
+                    logo_html,
+                    f'        {body}',
+                    '    </div>'
+                ])
+            else:
+                # Regular ### content slide
+                (body, _) = html_exporter.from_notebook_node(nbformat.v4.new_notebook(cells=slide_cells))
+                html_parts.extend([
+                    '    <div class="slide content-slide">',
+                    logo_html,
+                    f'        {body}',
+                    '    </div>'
+                ])
+        else:
+            # Old format compatibility
+            slide_cells, slide_title = slide_data
+            (body, _) = html_exporter.from_notebook_node(nbformat.v4.new_notebook(cells=slide_cells))
+            html_parts.extend([
+                '    <div class="slide content-slide">',
                 logo_html,
-            f'        {body}',
-            '   </div>'
-        ])
+                f'        {body}',
+                '    </div>'
+            ])
     
     # SLIDE Last
     last_slide_style = f'style="background-image: url({last_slide_img});"' if last_slide_img else ''
