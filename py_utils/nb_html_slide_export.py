@@ -212,6 +212,7 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
             current_slide_cells.append(cell)
     
     if current_slide_cells:
+        current_slide_cells.append(nbformat.v4.new_markdown_cell('---'))
         if found_first_h2:
             slides.append((current_slide_cells, current_slide_title))
         else:
@@ -351,7 +352,7 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
             '    <div class="slide content-slide">',
                 logo_html,
             f'        {body}',
-            '    <hr></div>'
+            '   </div>'
         ])
     
     # SLIDE Last

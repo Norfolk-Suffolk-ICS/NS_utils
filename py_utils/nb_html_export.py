@@ -41,9 +41,9 @@ def _get_custom_styles() -> str:
     .slide-logo {
         position: absolute;
         top: 20px;
-        right: 40px;
-        max-width: 250px;
-        max-height: 150px;
+        right: 100px;
+        max-width: 200px;
+        max-height: 120px;
         z-index: 100;
     }
     #go-to-top {
@@ -183,7 +183,7 @@ def convert_notebook_to_html_string(notebook_path:str, author_name:str, exclude_
             for i, line in enumerate(lines):
                 if line.startswith('#') and not line.startswith('##'):
                     lines.insert(i + 1, '\n*Website: <a href="https://www.intelligencefunction.org" target="_blank">The Intelligence Function</a>*\n')
-                    lines.insert(i + 1, f'\nAuthor: <p>{author_name}</a>*\n')
+                    lines.insert(i + 1, f'\n<p>Author: {author_name}</p>*\n')
                     cell.source = '\n'.join(lines)
                     break
             break
