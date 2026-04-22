@@ -31,34 +31,18 @@ def _get_slide_styles():
         }
         .slide.active { display: block; }
         
-        /* Title slide - only flex when active */
-        .slide.title-slide.active { 
-            display: flex;
-            flex-direction: column; 
-            justify-content: center; 
-            align-items: center;
-        }
-        .slide.title-slide {
+        /* Before TOC slides - full background with centered content */
+        .slide.before-toc-slide {
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            padding: 0;
         }
-        
-        /* First image slide - only flex when active */
-        .slide.first-image-slide.active {
+        .slide.before-toc-slide.active {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-        }
-        .slide.first-image-slide {
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-        }
-        .slide.first-image-slide img {
-            max-width: 100% !important;
-            max-height: 100% !important;
-            object-fit: contain;
         }
         
         /* Logo - TOP RIGHT */
@@ -331,17 +315,17 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
     if slides and len(slides) > 0:
         slides.pop(0)
     
-    # SLIDE 1: First image slide
+    # SLIDE 1: First image slide with background
+    first_slide_style = f'style="background-image: url({first_slide_img});"' if first_slide_img else ''
     html_parts.extend([
-        '    <div class="slide first-image-slide active">',
-        f'        <img src="{first_slide_img}" alt="First Slide">',
+        f'    <div class="slide before-toc-slide active" {first_slide_style}>',
         '    </div>'
     ])
     
     # SLIDE 2: Title slide with background
     title_slide_style = f'style="background-image: url({slide_bg_img});"' if slide_bg_img else ''
     html_parts.extend([
-        f'    <div class="slide title-slide" {title_slide_style}>',
+        f'    <div class="slide before-toc-slide" {title_slide_style}>',
         f'       <h1>{title}</h1>',
         '        <h4 style="margin-top: 30px; text-align: left !important;">Website: <a href="https://www.intelligencefunction.org" target="_blank"><u>The Intelligence Function</u></a></h4>',
         f'       <h4 style="text-align: left !important;">Author: {author_name}</h4>',
@@ -369,9 +353,9 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
         ])
     
     # SLIDE Last: Last image slide
+    last_slide_style = f'style="background-image: url({first_slide_img1});"' if first_slide_img1 else ''
     html_parts.extend([
-        '    <div class="slide first-image-slide active">',
-        f'        <img src="{first_slide_img1}" alt="First Slide">',
+        f'    <div class="slide before-toc-slide" {last_slide_style}>',
         '    </div>'
     ])
 
