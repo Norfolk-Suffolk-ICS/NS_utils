@@ -190,7 +190,7 @@ def convert_notebook_to_html_string(notebook_path:str, author_name:str, exclude_
             for i, line in enumerate(lines):
                 if line.startswith('#') and not line.startswith('##'):
                     lines.insert(i + 1, '\n*Website: <a href="https://www.intelligencefunction.org" target="_blank">The Intelligence Function</a>*\n')
-                    lines.insert(i + 2, f'\n<p>Author: {author_name}</p>*\n')
+                    lines.insert(i + 2, f'\n<p>Author: {author_name}</p>')
                     cell.source = '\n'.join(lines)
                     break
             break
@@ -239,10 +239,10 @@ def convert_notebook_to_html_string(notebook_path:str, author_name:str, exclude_
     
     # Add bottom logo and button before closing body tag
     if '</body>' in body:
-        body = body.replace('</body>', f'{logo_html_bottom}{go_to_top_button}{scroll_script}\n</body>')
+        body = body.replace('</body>', f'{go_to_top_button}{scroll_script}\n</body>')
     else:
         # If no body tag, append to the end
-        body = body + logo_html_bottom + go_to_top_button + scroll_script
+        body = body + go_to_top_button + scroll_script
 
     if make_table_of_contents:
         # Generating TOC
@@ -251,7 +251,7 @@ def convert_notebook_to_html_string(notebook_path:str, author_name:str, exclude_
         return body
 
     # Combining TOC and Body
-    body_with_toc = f"<div id = 'toc'><h3>Table of contents</h3>{toc}<hr></div> \n \n {body}"
+    body_with_toc = f"<div id = 'toc'><h3>Table of contents</h3>{toc}<hr></div> \n \n {body}{logo_html_bottom}"
     
     return body_with_toc
 
