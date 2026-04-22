@@ -41,7 +41,7 @@ def _get_custom_styles() -> str:
         position: fixed; 
         top: 20px;
         right: 5px;
-        max-width: 280px;
+        max-width: 280px !important;
         max-height: 150px;
         z-index: 100;
     }
@@ -250,7 +250,7 @@ def convert_notebook_to_html_string(notebook_path:str, author_name:str, exclude_
         return body
 
     # Combining TOC and Body
-    body_with_toc = f"<div id = 'toc'><h3>Table of contents</h3>{toc}<hr></div> \n \n {body}{logo_html_bottom}"
+    body_with_toc = f"<div id = 'toc'><h3>Table of contents</h3>{toc}<hr></div> \n \n {body}<hr>{logo_html_bottom}<hr>"
     
     return body_with_toc
 
