@@ -38,6 +38,14 @@ def _get_custom_styles() -> str:
     #toc a:hover{
         color: blue;
     }
+    .slide-logo {
+        position: absolute;
+        top: 20px;
+        right: 40px;
+        max-width: 250px;
+        max-height: 150px;
+        z-index: 100;
+    }
     #go-to-top {
         position: fixed;
         bottom: 30px;
@@ -144,7 +152,7 @@ def _generate_table_of_contents(notebook_path:str)->str:
     return toc_str
 
 
-def convert_notebook_to_html_string(notebook_path:str, exclude_input_cells=True, make_table_of_contents:bool=True)->str:
+def convert_notebook_to_html_string(notebook_path:str, author_name:str, exclude_input_cells=True, make_table_of_contents:bool=True)->str:
     """Takes a notebook file path, and converts to html using nbconvert.HtmlExporter
     Args: notebook_path:str, path to the notebook file
           exclude_input_cells:bool, whether to include the input cells
@@ -175,6 +183,7 @@ def convert_notebook_to_html_string(notebook_path:str, exclude_input_cells=True,
             for i, line in enumerate(lines):
                 if line.startswith('#') and not line.startswith('##'):
                     lines.insert(i + 1, '\n*Website: <a href="https://www.intelligencefunction.org" target="_blank">The Intelligence Function</a>*\n')
+                    lines.insert(i + 1, f'\nAuthor: <p>{author_name}</a>*\n')
                     cell.source = '\n'.join(lines)
                     break
             break

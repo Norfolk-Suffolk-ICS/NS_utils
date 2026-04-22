@@ -15,7 +15,7 @@ def _get_slide_styles():
             font-family: 'Segoe UI', sans-serif;
             background: #f5f5f5;
             color: #333;
-            overflow: hidden;
+            overflow: hidden !important;
         }
         
         .slide-container { width: 100vw; height: 100vh; position: relative; overflow: hidden; }
@@ -351,7 +351,7 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
             '    <div class="slide content-slide">',
                 logo_html,
             f'        {body}',
-            '    </div>'
+            '    <hr></div>'
         ])
     
     # SLIDE Last
