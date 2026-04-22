@@ -46,7 +46,6 @@ def _get_slide_styles():
             padding-right: 50px;
         }
         
-        /* Logo - TOP RIGHT */
         .slide-logo {
             position: absolute;
             top: 20px;

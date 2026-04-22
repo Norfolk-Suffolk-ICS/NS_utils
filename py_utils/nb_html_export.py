@@ -39,7 +39,7 @@ def _get_custom_styles() -> str:
         color: blue;
     }
     .slide-logo {
-        position: absolute;
+        position: fixed; 
         top: 20px;
         right: 5px;
         max-width: 280px;
