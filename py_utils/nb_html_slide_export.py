@@ -36,13 +36,13 @@ def _get_slide_styles():
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            padding: 0;
         }
         .slide.before-toc-slide.active {
             display: flex;
             flex-direction: column;
             justify-content: center;
-            align-items: center;
+            align-items: left;
+            padding: 80px;
         }
         
         /* Logo - TOP RIGHT */
@@ -82,7 +82,7 @@ def _get_slide_styles():
         .toc-list li { padding: 15px 20px; margin: 10px 0; background: #f0f0f0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
         .toc-list li:hover { background: #e0e0e0; transform: translateX(10px); }
         .slide-controls { position: fixed; bottom: 30px; right: 30px; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.7); padding: 10px 15px; border-radius: 50px; z-index: 1000; }
-        .nav-btn { background: #064169; color: white; border: none; padding: 8px 15px; border-radius: 25px; cursor: pointer; font-size: 1em; transition: all 0.3s ease; font-weight: 600; }
+        .nav-btn { background: #064169; color: white; border: none; padding: 10px 15px; border-radius: 25px; cursor: pointer; font-size: 1em; transition: all 0.3s ease; font-weight: 600; }
         .nav-btn:hover { background: #053050; transform: scale(1.05); }
         .nav-btn:disabled { background: #ccc; cursor: not-allowed; transform: scale(1); }
         .slide-counter { color: white; font-size: 1.1em; font-weight: 600; }
@@ -256,26 +256,26 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
         with open(logo_path, 'rb') as f:
             logo_base64 = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
     
-    # Load first slide image
+    # Load first slide BG-image
     first_slide_img = ""
-    first_slide_path = os.path.join(assets_dir, 'main_slide.png')
+    first_slide_path = os.path.join(assets_dir, 'slide_first.png')
     if os.path.exists(first_slide_path):
         with open(first_slide_path, 'rb') as f:
             first_slide_img = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
     
-    # Load background image
+    # Load title slide BG-image
     slide_bg_img = ""
     bg_path = os.path.join(assets_dir, 'slide_bg.png')
     if os.path.exists(bg_path):
         with open(bg_path, 'rb') as f:
             slide_bg_img = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
 
-    # Load Last slide image
-    first_slide_img1 = ""
-    first_slide_path1 = os.path.join(assets_dir, 'first_slide.png')
-    if os.path.exists(first_slide_path1):
-        with open(first_slide_path1, 'rb') as f:
-            first_slide_img1 = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
+    # Load last slide BG-image
+    last_slide_img = ""
+    last_slide_path = os.path.join(assets_dir, 'slide_last.png')
+    if os.path.exists(last_slide_path):
+        with open(last_slide_path, 'rb') as f:
+            last_slide_img = f"data:image/png;base64,{base64.b64encode(f.read()).decode()}"
 
     # Logo HTML
     logo_html = f'<a href="https://www.intelligencefunction.org" target="_blank"><img src="{logo_base64}" class="slide-logo" alt="Logo"></a>' if logo_base64 else ''
@@ -301,21 +301,20 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
         '<head>',
         '    <meta charset="UTF-8">',
         '    <meta name="viewport" content="width=device-width, initial-scale=1.0">',
-        f'    <title>{title}</title>',
-        f'    {plotly_script_tag}',
-        f'    {vega_script_tag}',
-        slide_styles,
+        f'   <title>{title}</title>',
+        f'   {plotly_script_tag}',
+        f'   {vega_script_tag}',
+            slide_styles,
         '</head>',
         '<body>',
-        '<div class="slide-container">'
+        '  <div class="slide-container">'
     ]
 
     # ALWAYS remove first element if it exists (content before first ##)
-    # This prevents duplication whether notebook starts with # or ##
     if slides and len(slides) > 0:
         slides.pop(0)
     
-    # SLIDE 1: First image slide with background
+    # SLIDE 1 
     first_slide_style = f'style="background-image: url({first_slide_img});"' if first_slide_img else ''
     html_parts.extend([
         f'    <div class="slide before-toc-slide active" {first_slide_style}>',
@@ -326,9 +325,10 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
     title_slide_style = f'style="background-image: url({slide_bg_img});"' if slide_bg_img else ''
     html_parts.extend([
         f'    <div class="slide before-toc-slide" {title_slide_style}>',
+        logo_html,
         f'       <h1>{title}</h1>',
-        '        <h4 style="margin-top: 30px; text-align: left !important;">Website: <a href="https://www.intelligencefunction.org" target="_blank"><u>The Intelligence Function</u></a></h4>',
-        f'       <h4 style="text-align: left !important;">Author: {author_name}</h4>',
+        '        <h3>Website: <a href="https://www.intelligencefunction.org" target="_blank"><u>The Intelligence Function</u></a></h3>',
+        f'       <h3>Author: {author_name}</h3>',
         '    </div>'
     ])
     
@@ -352,8 +352,8 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
             '    </div>'
         ])
     
-    # SLIDE Last: Last image slide
-    last_slide_style = f'style="background-image: url({first_slide_img1});"' if first_slide_img1 else ''
+    # SLIDE Last
+    last_slide_style = f'style="background-image: url({last_slide_img});"' if last_slide_img else ''
     html_parts.extend([
         f'    <div class="slide before-toc-slide" {last_slide_style}>',
         '    </div>'
