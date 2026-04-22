@@ -168,61 +168,60 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
     slides = []
     current_slide_cells = []
     current_slide_title = None
-    in_h3_section = False
     
     for cell in nb['cells']:
         if cell.cell_type == 'markdown':
             lines = cell.source.split('\n')
+            temp_lines = []
             
-            has_h2 = False
-            has_h3 = False
-            
-            # Check what headers this cell contains
-            for line in lines:
+            i = 0
+            while i < len(lines):
+                line = lines[i]
+                
+                # Found ## header - create section slide
                 if line.startswith('##') and not line.startswith('###'):
-                    has_h2 = True
-                    break
+                    # Save any accumulated temp content to current slide
+                    if temp_lines:
+                        current_slide_cells.append(nbformat.v4.new_markdown_cell('\n'.join(temp_lines)))
+                        temp_lines = []
+                    
+                    # Save current slide if exists
+                    if current_slide_cells:
+                        slides.append((current_slide_cells, current_slide_title, 'content'))
+                        current_slide_cells = []
+                        current_slide_title = None
+                    
+                    # Extract ## title and create section slide
+                    section_title = line.strip('#').strip()
+                    section_cell = nbformat.v4.new_markdown_cell(f'<h1>{section_title}</h1>')
+                    slides.append(([section_cell], section_title, 'section'))
+                    
+                # Found ### header - start new content slide
                 elif line.startswith('###') and not line.startswith('####'):
-                    has_h3 = True
-                    break
+                    # Save any accumulated temp content to current slide
+                    if temp_lines:
+                        current_slide_cells.append(nbformat.v4.new_markdown_cell('\n'.join(temp_lines)))
+                        temp_lines = []
+                    
+                    # Save previous content slide if exists
+                    if current_slide_cells:
+                        slides.append((current_slide_cells, current_slide_title, 'content'))
+                        current_slide_cells = []
+                    
+                    # Extract ### title and start collecting content
+                    current_slide_title = line.strip('#').strip()
+                    temp_lines.append(line)  # Include the ### header in the content
+                    
+                else:
+                    # Regular line - accumulate it
+                    temp_lines.append(line)
+                
+                i += 1
             
-            if has_h2:
-                # Save any accumulated content slide first
-                if current_slide_cells:
-                    slides.append((current_slide_cells, current_slide_title, 'content'))
-                    current_slide_cells = []
-                    current_slide_title = None
-                
-                # Extract ## title
-                for line in lines:
-                    if line.startswith('##') and not line.startswith('###'):
-                        section_title = line.strip('#').strip()
-                        break
-                
-                # Create section slide (just centered title with background)
-                section_cell = nbformat.v4.new_markdown_cell(f'<h1>{section_title}</h1>')
-                slides.append(([section_cell], section_title, 'section'))
-                in_h3_section = False
-                
-            elif has_h3:
-                # Save previous content slide if exists
-                if current_slide_cells:
-                    slides.append((current_slide_cells, current_slide_title, 'content'))
-                    current_slide_cells = []
-                
-                # Extract ### title for this new slide
-                for line in lines:
-                    if line.startswith('###') and not line.startswith('####'):
-                        current_slide_title = line.strip('#').strip()
-                        break
-                
-                # Add this cell to new content slide
-                current_slide_cells.append(cell)
-                in_h3_section = True
-                
-            else:
-                # Regular content - add to current slide
-                current_slide_cells.append(cell)
+            # Add any remaining temp lines to current slide
+            if temp_lines:
+                current_slide_cells.append(nbformat.v4.new_markdown_cell('\n'.join(temp_lines)))
+        
         else:
             # Code cells - add to current slide
             current_slide_cells.append(cell)
