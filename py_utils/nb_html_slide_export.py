@@ -57,7 +57,7 @@ def _get_slide_styles():
         
         .slide h1 { font-size: 5.5em !important; margin-bottom: 0.5em; font-weight: 800 !important; color: #064169; text-align: left; }
         .slide h2 { font-size: 3.5em !important; margin-bottom: 0.5em; color: #064169; border-bottom: 3px solid #064169; padding-bottom: 0.2em; }
-        .slide h3 { font-size: 2.5em !important; margin-top: 1em; margin-bottom: 0.5em; color: #064169; }
+        .slide h3 { font-size: 2.5em !important; margin-bottom: 0.5em; color: #064169; border-bottom: 3px solid #064169; padding-bottom: 0.2em; }
         .slide p { font-size: 1.5em !important; line-height: 1.5; margin-bottom: 0.5em; }
         .slide ul, .slide ol { font-size: 1.5em !important; margin-left: 2em; margin-bottom: 0.5em; line-height: 1.5; display: inline-block; text-align: left; }
         a {color: #0000EE !important;}
@@ -180,10 +180,10 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
                 
                 # Found ## header - create section slide
                 if line.startswith('##') and not line.startswith('###'):
-                    # Save any accumulated temp content to current slide
-                    if temp_lines:
+                    # Save any accumulated temp content to current slide (skip if empty/whitespace only)
+                    if temp_lines and any(l.strip() for l in temp_lines):
                         current_slide_cells.append(nbformat.v4.new_markdown_cell('\n'.join(temp_lines)))
-                        temp_lines = []
+                    temp_lines = []
                     
                     # Save current slide if exists
                     if current_slide_cells:
@@ -191,17 +191,17 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
                         current_slide_cells = []
                         current_slide_title = None
                     
-                    # Extract ## title and create section slide
+                    # Extract ## title and create section slide (keep as ##, not <h1>)
                     section_title = line.strip('#').strip()
-                    section_cell = nbformat.v4.new_markdown_cell(f'<h1>{section_title}</h1>')
+                    section_cell = nbformat.v4.new_markdown_cell(line)  # Keep original ## markdown
                     slides.append(([section_cell], section_title, 'section'))
                     
                 # Found ### header - start new content slide
                 elif line.startswith('###') and not line.startswith('####'):
-                    # Save any accumulated temp content to current slide
-                    if temp_lines:
+                    # Save any accumulated temp content to current slide (skip if empty/whitespace only)
+                    if temp_lines and any(l.strip() for l in temp_lines):
                         current_slide_cells.append(nbformat.v4.new_markdown_cell('\n'.join(temp_lines)))
-                        temp_lines = []
+                    temp_lines = []
                     
                     # Save previous content slide if exists
                     if current_slide_cells:
@@ -210,7 +210,7 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
                     
                     # Extract ### title and start collecting content
                     current_slide_title = line.strip('#').strip()
-                    temp_lines.append(line)  # Include the ### header in the content
+                    temp_lines.append(line)  # Include the ### header to get h2 styling with underline
                     
                 else:
                     # Regular line - accumulate it
@@ -218,8 +218,8 @@ def _split_notebook_into_slides(notebook_path: str, exclude_input_cells: bool = 
                 
                 i += 1
             
-            # Add any remaining temp lines to current slide
-            if temp_lines:
+            # Add any remaining temp lines to current slide (skip if empty/whitespace only)
+            if temp_lines and any(l.strip() for l in temp_lines):
                 current_slide_cells.append(nbformat.v4.new_markdown_cell('\n'.join(temp_lines)))
         
         else:
