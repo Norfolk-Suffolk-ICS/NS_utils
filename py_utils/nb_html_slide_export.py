@@ -64,7 +64,7 @@ def _get_slide_styles():
         a {color: #0000EE !important;}
 
         /* Media - exclude logo from general img styling */
-        .slide img:not(.slide-logo) { max-height: 500px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: block; margin: 20px auto; }
+        .slide img:not(.slide-logo) {border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: block; margin: 20px auto; }
         .slide pre { background: #f8f9fa; border-left: 4px solid #064169; padding: 20px; margin: 20px auto; overflow-x: auto; border-radius: 6px; font-size: 0.95em; max-width: 90%; text-align: left; }
         .slide code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
         

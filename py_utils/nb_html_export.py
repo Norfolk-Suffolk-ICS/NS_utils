@@ -39,6 +39,9 @@ def _get_custom_styles() -> str:
         color: blue;
         transform: translateX(10px);
     }
+    .toc-list { list-style: none; margin-left: 0; font-size: 1.4em; }
+    .toc-list li { padding: 15px 20px; margin: 10px 0; background: #f0f0f0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
+    .toc-list li:hover { background: #e0e0e0; transform: translateX(10px); }
     .slide-logo {
         position: fixed; 
         top: 20px;
@@ -79,8 +82,8 @@ def _get_custom_styles() -> str:
     h1 { font-size: 5em !important; margin-bottom: 0.5em; font-weight: 700 !important; color: #064169; text-align: left; }
     h2 { font-size: 3.5em !important; margin-bottom: 0.5em; color: #064169; }
     h3 { font-size: 2.5em !important; margin-bottom: 0.5em; color: #064169; border-bottom: 3px solid #064169; padding-bottom: 0.2em; }
-    h4 { font-size: 1.5em !important; margin-bottom: 0.5em; color: #064169; }
-    p { font-size: 1em !important; line-height: 1.5; margin-bottom: 0.5em; }
+    h4 { font-size: 2em !important; margin-bottom: 0.5em; color: #064169; }
+    p { font-size: 1.5em !important; line-height: 1.5; margin-bottom: 0.5em; }
     ul, ol { font-size: 1.5em !important; margin-left: 2em; margin-bottom: 0.5em; line-height: 1.5; display: inline-block; text-align: left; }
     table, tbody{ border: 1px outset; text-align : center: margin-left: inherit !important; }
     .plotly-graph-div, .vega-embed { margin: 20px auto !important; display: block; }
@@ -136,7 +139,7 @@ def _generate_table_of_contents(notebook_path:str)->str:
                     level = line.count('#')
                     title = line.strip('#').strip()
                     table_of_contents.append((title, level))
-    toc_lines = []
+    toc_lines = ['<ul class="toc-list">']
     for title, level in table_of_contents:
         indent = '&nbsp;'
         if level >2: 
