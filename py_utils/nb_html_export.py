@@ -28,13 +28,15 @@ def _get_custom_styles() -> str:
         height: fit-content;
         padding: 20px;
         border-radius: 25px;
-        font-size: 14px;
-        line-height: 1.3;
+        font-size: 14px;  
     }
-
-    .toc-list { list-style: none; margin-left: 0; font-size: 1.4em; }
-    .toc-list a { padding: 15px 20px; margin: 10px 0; background: #f0f0f0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
-    .toc-list a:hover { background: #e0e0e0; transform: translateX(10px); }
+    #toc a{
+        color: #231F20; cursor: pointer; transition: all 0.3s ease;
+    }
+    #toc a:hover{
+        color: blue;
+        transform: translateX(10px);
+    }
     .slide-logo {
         position: fixed; 
         top: 20px;
@@ -132,7 +134,7 @@ def _generate_table_of_contents(notebook_path:str)->str:
                     level = line.count('#')
                     title = line.strip('#').strip()
                     table_of_contents.append((title, level))
-    toc_lines = ['<ul class="toc-list">']
+    toc_lines = []
     for title, level in table_of_contents:
         indent = '&nbsp;'
         if level >2: 
