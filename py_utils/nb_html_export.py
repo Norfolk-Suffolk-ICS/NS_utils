@@ -30,18 +30,11 @@ def _get_custom_styles() -> str:
         border-radius: 25px;
         font-size: 14px;
         line-height: 1.3;
-        padding: 5px
     }
-    #toc a{
-        color: #231F20;
-    }
-    #toc a:hover{
-        color: blue;
-        transform: translateX(10px);
-    }
+
     .toc-list { list-style: none; margin-left: 0; font-size: 1.4em; }
-    .toc-list li { padding: 15px 20px; margin: 10px 0; background: #f0f0f0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
-    .toc-list li:hover { background: #e0e0e0; transform: translateX(10px); }
+    .toc-list a { padding: 15px 20px; margin: 10px 0; background: #f0f0f0; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; }
+    .toc-list a:hover { background: #e0e0e0; transform: translateX(10px); }
     .slide-logo {
         position: fixed; 
         top: 20px;
@@ -84,7 +77,7 @@ def _get_custom_styles() -> str:
     h3 { font-size: 2.5em !important; margin-bottom: 0.5em; color: #064169; border-bottom: 3px solid #064169; padding-bottom: 0.2em; }
     h4 { font-size: 2em !important; margin-bottom: 0.5em; color: #064169; }
     p { font-size: 1.5em !important; line-height: 1.5; margin-bottom: 0.5em; }
-    ul, ol { font-size: 1.5em !important; margin-left: 2em; margin-bottom: 0.5em; line-height: 1.5; display: inline-block; text-align: left; }
+    ul, ol { font-size: 1.5em !important; line-height: 1.5; display: inline-block; text-align: left; }
     table, tbody{ border: 1px outset; text-align : center: margin-left: inherit !important; }
     .plotly-graph-div, .vega-embed { margin: 20px auto !important; display: block; }
     .slide img:not(.slide-logo) {border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: block; margin: 20px auto; }
