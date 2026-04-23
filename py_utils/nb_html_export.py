@@ -30,12 +30,14 @@ def _get_custom_styles() -> str:
         border-radius: 25px;
         font-size: 14px;
         line-height: 1.3;
+        padding: 5px
     }
     #toc a{
         color: #231F20;
     }
     #toc a:hover{
         color: blue;
+        transform: translateX(10px);
     }
     .slide-logo {
         position: fixed; 
@@ -74,30 +76,17 @@ def _get_custom_styles() -> str:
     #go-to-top.show {
         display: block;
     }
-    h1{
-        font-size: 40px !important;
-        color: #064169 !important;
-    }
-    h2 {
-        font-size: 30px !important;
-        color: #064169 !important;
-    }
-    h3 {
-        font-size: 24px !important;
-        color: #064169 !important;
-    }
-    p, li, ul {
-        font-size: 14px !important;
-        font-family: Arial;
-    }
-    table, tbody{
-        border: 1px outset;
-        text-align : center:
-        margin-left: inherit !important;
-    }
-    #buttons {
-        font-size: x-large !important;
-    }
+    h1 { font-size: 5em !important; margin-bottom: 0.5em; font-weight: 700 !important; color: #064169; text-align: left; }
+    h2 { font-size: 3.5em !important; margin-bottom: 0.5em; color: #064169; }
+    h3 { font-size: 2.5em !important; margin-bottom: 0.5em; color: #064169; border-bottom: 3px solid #064169; padding-bottom: 0.2em; }
+    h4 { font-size: 1.5em !important; margin-bottom: 0.5em; color: #064169; }
+    p { font-size: 1em !important; line-height: 1.5; margin-bottom: 0.5em; }
+    ul, ol { font-size: 1.5em !important; margin-left: 2em; margin-bottom: 0.5em; line-height: 1.5; display: inline-block; text-align: left; }
+    table, tbody{ border: 1px outset; text-align : center: margin-left: inherit !important; }
+    .plotly-graph-div, .vega-embed { margin: 20px auto !important; display: block; }
+    .slide img:not(.slide-logo) {border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: block; margin: 20px auto; }
+    #buttons { font-size: x-large !important; }
+
     </style>
     """
     return styles
@@ -250,20 +239,20 @@ def convert_notebook_to_html_string(notebook_path:str, author_name:str, exclude_
         return body
 
     # Combining TOC and Body
-    body_with_toc = f"<div id = 'toc'><h3>Table of contents</h3>{toc}<hr></div> \n \n {body}<hr>{logo_html_bottom}<hr>"
+    body_with_toc = f"<div id = 'toc'><h3>Table of contents</h3>{toc}<hr></div> \n \n {body}{logo_html_bottom}<hr>"
     
     return body_with_toc
 
 
-def write_notebook_to_html(notebook_content:str, notebook_path:str)->None:
+def write_notebook_to_html(notebook_content:str, output_file_path:str)->None:
     """Takes a notebook file as a string and writes this to a html file.
     Args: notebook_content:str, the html content of the notebook
           notebook_path:str, the path to save the notebook to, if this is .ipynb it will be changed to .html
     """
-    if '.ipynb' in notebook_path:
-        output_file_path = notebook_path.replace('.ipynb','.html')
+    if '.ipynb' in output_file_path:
+        output_file_path = output_file_path.replace('.ipynb','.html')
     else:
-        raise ValueError("{} is not a .ipynb file".format(notebook_path))
+        raise ValueError("{} is not a .ipynb file".format(output_file_path))
     # Write HTML content to a file
     with open(output_file_path, 'w', encoding='utf-8') as f:
         f.write(notebook_content)

@@ -42,7 +42,7 @@ def _get_slide_styles():
             flex-direction: column;
             justify-content: center;
             align-items: flex-start;
-            padding-left: 400px;
+            padding-left: 600px;
             padding-right: 50px;
         }
         
@@ -64,7 +64,7 @@ def _get_slide_styles():
         a {color: #0000EE !important;}
 
         /* Media - exclude logo from general img styling */
-        .slide img:not(.slide-logo) { max-height: 500px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .slide img:not(.slide-logo) { max-height: 500px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: block; margin: 20px auto; }
         .slide pre { background: #f8f9fa; border-left: 4px solid #064169; padding: 20px; margin: 20px auto; overflow-x: auto; border-radius: 6px; font-size: 0.95em; max-width: 90%; text-align: left; }
         .slide code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; font-family: 'Courier New', monospace; }
         
@@ -398,12 +398,12 @@ def convert_notebook_to_slides_html(notebook_path: str, author_name: str, exclud
     return '\n'.join(html_parts)
 
 
-def write_notebook_to_html_slide(notebook_content: str, notebook_path: str) -> None:
+def write_notebook_to_html_slide(notebook_content: str, output_file_path: str) -> None:
     """Writes notebook HTML content to a file."""
-    if '.ipynb' in notebook_path:
-        output_file_path = notebook_path.replace('.ipynb', '_slides.html')
+    if '.ipynb' in output_file_path:
+        output_file_path = output_file_path.replace('.ipynb', '_slides.html')
     else:
-        raise ValueError(f"{notebook_path} is not a .ipynb file")
+        raise ValueError(f"{output_file_path} is not a .ipynb file")
     
     with open(output_file_path, 'w', encoding='utf-8') as f:
         f.write(notebook_content)
