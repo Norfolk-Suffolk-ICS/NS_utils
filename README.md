@@ -11,25 +11,22 @@ NS_utils is an Internal Python Library (Python package distribution) designed fo
 ## Packages/Modules of NS_utils Library 
 
 
-### 1. NS Styling/Visualisation Package : ns_styles
+### 1. ns_styles: Styling & visualisation package :
 - A Python package for visualisation, containing useful functions for implementing Norfolk and Suffolk (NS) Intelligence Function style.
 
 
-### 2. Python Utility Package : py_utils
-
-#### Sub-modules & Tools
-
-- <b>nb_html_export.py</b> - This python file contains a set of convenience function to convert notebook to html and add table of contents. This primarily used nbconvert to perform the conversion and bs4 to insert the table of contents.
-- <b>snowflake_sql.py</b> - This python file contains a set of functions to establish connection with snowflake database and load/save data from sql files.
-- <b>utils.py</b> - This python file contains reusable analytical functions.
+### 2. py_utils: Python functions package
+- <b>nb_html_slide_export.py</b> - Contains a set of convenience function to convert notebook to html slides and add table of contents.
+- <b>nb_html_export.py</b> - Contains a set of convenience function to convert notebook to html page and add table of contents.
+- <b>snowflake_sql.py</b> - Contains a set of functions to establish connection with snowflake database and load/save data from sql files.
+- <b>utils.py</b> - Contains reusable analytical functions.
 
 
 ## Installation: How do I install NS_utils?
 
-`NS_utils` is a parent package or python library that holds both the child packages namely: `py_utils` and `ns_styles` Python packages. Installation is using pip:
-
-- It is recommended to use a Virtual Environment
-- This will then install the module in your environment, optionally specifying the version
+`NS_utils` is a parent package or python library that holds both the child packages namely: `py_utils` and `ns_styles` Python packages.
+<br>It is recommended to use a Virtual Environment, installing the modules/libraries in your environment rather local machine.
+<br>Installation is using pip (latest version 0.1.7)
 
 ```
 pip install git+https://github.com/Norfolk-Suffolk-ICS/NS_utils.git
@@ -37,33 +34,36 @@ pip install git+https://github.com/Norfolk-Suffolk-ICS/NS_utils.git
 or optionally specifying a version:
 
 ```
-pip install git+https://github.com/Norfolk-Suffolk-ICS/NS_utils.git@v0.1.6
+pip install git+https://github.com/Norfolk-Suffolk-ICS/NS_utils.git@v0.1.7
 ```
 
 
 ## How to use py_utils and ns_styles ?
 
-Once the parent package is installed, to use the py_utils or ns_styles package in your notebook, use:
-
+Once the parent package is installed, to use the py_utils or ns_styles package in your notebook, do the below:
+> An example notebook with the output reports can be found in this repo here -->  [py_utils --> examples](https://github.com/Norfolk-Suffolk-ICS/NS_utils/tree/main/py_utils/examples)
 
 #### Example: py_utils
 
 ```python
-from py_utils import snowflake_sql, nb_html_export, utils
- # OR directly import each functions inside each sub-module in apckage py_utils, in this case you dont have to use module name before the function on each call
-from py_utils import convert_notebook_to_html_string, write_notebook_to_html, create_snowflake_sql_engine, load_data_try_parquet_first,
-    calculate_standardised_rates, calculate_axis_lim, get_fiscal_year
+from py_utils import snowflake_sql, nb_html_export, nb_html_slide_export, utils
 
-my_notebook = "Report.ipynb"
+ # OR directly import each functions inside each file in py_utils, in this case you dont have to use module name during function call
 
-# By default this will include table of contents and exclude inputs (code)
-formatted_html_with_table_of_contents = nb_html_export.convert_notebook_to_html_string(my_notebook)
-# If import using 2nd way then 
-formatted_html_with_table_of_contents = convert_notebook_to_html_string(my_notebook)
+from py_utils import convert_notebook_to_html_string, write_notebook_to_html, convert_notebook_to_slides_html, write_notebook_to_html_slide, create_snowflake_sql_engine,
+load_data_try_parquet_first, calculate_standardised_rates, calculate_axis_lim, get_fiscal_year
+```
+```python
 
-# This saves the notebook down to the original file name, but with .html
-nb_html_export.write_notebook_to_html(formatted_html_with_table_of_contents, my_notebook)
+# To generate HTML page like report, use this block of code
+formatted_notebook_with_toc = nb_html_export.convert_notebook_to_html_string(notebook_path='example_report.ipynb', author_name='Author name')
+nb_html_export.write_notebook_to_html(formatted_notebook_with_toc, output_file_path='name_of_output_report.ipynb')
 
+# To generate HTML slides like report, use this block of code
+formatted_notebook_with_toc = nb_html_slide_export.convert_notebook_to_slides_html(notebook_path='example_report.ipynb', author_name='Author name')
+nb_html_slide_export.write_notebook_to_html_slide(formatted_notebook_with_toc, output_file_path='name_of_output_report.ipynb')
+
+# To establish connection with Snowflake server
 # You can input 'prd' or 'dev' depending on the instance you want to connect
 sql_engine = snowflake_sql.create_snowflake_sql_engine(profile_env = 'prd')  
 
