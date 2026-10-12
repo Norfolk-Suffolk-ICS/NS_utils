@@ -15,4 +15,4 @@ __all__ = [
     "write_notebook_to_html_slide"
 ]
 
-__version__ = "0.1.7"
+__version__ = "0.1.8"
